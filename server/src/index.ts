@@ -1,7 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
 import routes from './routes';
+import swaggerDocument from './swagger.json';
 
 dotenv.config();
 
@@ -15,6 +17,9 @@ if (!process.env.JWT_SECRET) {
 // 中间件
 app.use(cors());
 app.use(express.json());
+
+// Swagger API 文档
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // 路由
 app.use('/api', routes);
