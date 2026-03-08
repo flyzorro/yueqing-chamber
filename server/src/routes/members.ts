@@ -6,6 +6,7 @@ import {
   updateMember,
   deleteMember
 } from '../controllers/memberController';
+import { validateMemberCreate } from '../middleware/validator';
 
 const router = Router();
 
@@ -15,8 +16,8 @@ router.get('/', getMembers);
 // GET /api/members/:id - 获取单个会员
 router.get('/:id', getMember);
 
-// POST /api/members - 创建会员
-router.post('/', createMember);
+// POST /api/members - 创建会员（添加验证）
+router.post('/', validateMemberCreate, createMember);
 
 // PUT /api/members/:id - 更新会员
 router.put('/:id', updateMember);
