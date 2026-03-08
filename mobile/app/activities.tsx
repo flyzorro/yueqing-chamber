@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface Activity {
   id: string;
+  uniqueId?: string;
   title: string;
   date: string;
   location: string;
@@ -24,7 +25,11 @@ export default function ActivitiesScreen() {
       const json = await response.json();
       
       if (json.success) {
-        setActivities(refresh ? json.data : [...activities, ...json.data]);
+        const newActivities = json.data.map((item: Activity, index: number) => ({
+          ...item,
+          uniqueId: `${item.id}_${pageNum}_${index}`
+        }));
+        setActivities(refresh ? newActivities : [...activities, ...newActivities]);
         setHasMore(json.data.length === 10);
       }
     } catch (error) {
@@ -94,7 +99,7 @@ export default function ActivitiesScreen() {
       <FlatList
         data={activities}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.uniqueId || item.id}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         onEndReached={onLoadMore}
         onEndReachedThreshold={0.5}
