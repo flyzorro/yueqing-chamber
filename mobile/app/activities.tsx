@@ -26,9 +26,10 @@ export default function ActivitiesScreen() {
       const json = await response.json();
       
       if (json.success) {
+        const currentPage = refresh ? 1 : pageNum;
         const newActivities = json.data.map((item: Activity, index: number) => ({
           ...item,
-          uniqueId: `${item.id}_${pageNum}_${index}`
+          uniqueId: `${item.id}_${currentPage}_${index}`
         }));
         setActivities(refresh ? newActivities : [...activities, ...newActivities]);
         setHasMore(json.data.length === 10);
