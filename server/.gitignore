@@ -1,21 +1,8 @@
 # Dependencies
 node_modules/
 
-# Expo
-.expo/
+# Build
 dist/
-web-build/
-
-# Native
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-
-# Metro
-.metro-health-check*
 
 # Debug
 npm-debug.*
@@ -24,7 +11,6 @@ yarn-error.*
 
 # macOS
 .DS_Store
-*.pem
 
 # Local env files
 .env*.local
@@ -34,9 +20,3 @@ yarn-error.*
 
 # Testing
 coverage/
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
