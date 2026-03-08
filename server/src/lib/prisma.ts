@@ -1,7 +1,15 @@
-import { PrismaClient } from '@prisma/client/index.js';
+// Prisma 7 使用动态导入
+let PrismaClient: any;
+
+try {
+  const prismaModule = await import('@prisma/client');
+  PrismaClient = prismaModule.PrismaClient;
+} catch (error) {
+  throw new Error('Failed to import PrismaClient: ' + error);
+}
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
+  prisma: any | undefined;
 };
 
 export const prisma =
