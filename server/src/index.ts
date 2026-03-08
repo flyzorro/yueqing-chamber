@@ -31,8 +31,8 @@ app.use(express.json());
 
 // Sentry 请求处理器（必须在路由之前）
 if (process.env.SENTRY_DSN) {
-  app.use(Sentry.Handlers.requestHandler());
-  app.use(Sentry.Handlers.tracingHandler());
+  app.use(Sentry.requestHandler());
+  app.use(Sentry.tracingHandler());
 }
 
 // Swagger API 文档
@@ -48,7 +48,7 @@ app.get('/health', (req, res) => {
 
 // Sentry 错误处理器（必须在路由之后）
 if (process.env.SENTRY_DSN) {
-  app.use(Sentry.Handlers.errorHandler());
+  app.use(Sentry.errorHandler());
 }
 
 // Vercel 导出
