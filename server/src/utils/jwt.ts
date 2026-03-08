@@ -1,6 +1,12 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'yueqing-chamber-secret-key-2026';
+// JWT 密钥必须从环境变量读取，不允许硬编码
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required. Please set it in .env file or environment variables.');
+}
+
 const JWT_EXPIRES_IN = '7d'; // 7 天有效期
 
 export interface JwtPayload {
