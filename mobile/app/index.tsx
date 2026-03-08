@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -15,7 +16,7 @@ export default function HomeScreen() {
 
         {/* 商会介绍 */}
         <View style={styles.introSection}>
-          <Text style={styles.sectionTitle}>📋 商会简介</Text>
+          <Text style={styles.sectionTitle}>商会简介</Text>
           <Text style={styles.introText}>
             乐清商会成立于2010年，是由乐清籍企业家自愿组成的非营利性社会团体。
             商会秉承"团结互助、共谋发展"的宗旨，为会员企业提供商务交流、资源共享、
@@ -39,28 +40,28 @@ export default function HomeScreen() {
 
         {/* 快捷入口 */}
         <View style={styles.menuSection}>
-          <Text style={styles.sectionTitle}>🚀 快捷入口</Text>
+          <Text style={styles.sectionTitle}>快捷入口</Text>
           <View style={styles.menu}>
             <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/members')}>
-              <Text style={styles.menuIcon}>👥</Text>
+              <Ionicons name="people" size={36} color="#007AFF" />
               <Text style={styles.menuText}>会员中心</Text>
               <Text style={styles.menuDesc}>会员名录管理</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/activities')}>
-              <Text style={styles.menuIcon}>📅</Text>
+              <Ionicons name="calendar" size={36} color="#007AFF" />
               <Text style={styles.menuText}>活动管理</Text>
               <Text style={styles.menuDesc}>商会活动报名</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/services')}>
-              <Text style={styles.menuIcon}>🤝</Text>
+              <Ionicons name="briefcase" size={36} color="#007AFF" />
               <Text style={styles.menuText}>商会服务</Text>
               <Text style={styles.menuDesc}>企业服务对接</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/profile')}>
-              <Text style={styles.menuIcon}>👤</Text>
+              <Ionicons name="person" size={36} color="#007AFF" />
               <Text style={styles.menuText}>个人中心</Text>
               <Text style={styles.menuDesc}>账户设置管理</Text>
             </TouchableOpacity>
@@ -69,7 +70,7 @@ export default function HomeScreen() {
 
         {/* 最新动态 */}
         <View style={styles.newsSection}>
-          <Text style={styles.sectionTitle}>📢 最新动态</Text>
+          <Text style={styles.sectionTitle}>最新动态</Text>
           <View style={styles.newsItem}>
             <Text style={styles.newsTitle}>2026年迎春年会报名开始</Text>
             <Text style={styles.newsDate}>2026-01-15</Text>
@@ -135,7 +136,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  menuIcon: { fontSize: 36 },
   menuText: { fontSize: 16, fontWeight: 'bold', color: '#333', marginTop: 8 },
   menuDesc: { fontSize: 12, color: '#999', marginTop: 4 },
 
