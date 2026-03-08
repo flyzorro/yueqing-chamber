@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function ProfileScreen() {
   return (
@@ -29,15 +30,19 @@ export default function ProfileScreen() {
 
       <View style={styles.menu}>
         <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuText}>🔔 通知设置</Text>
+          <Ionicons name="notifications" size={20} color="#333" style={styles.menuIcon} />
+          <Text style={styles.menuText}>通知设置</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuText}>🔒 隐私设置</Text>
+          <Ionicons name="lock-closed" size={20} color="#333" style={styles.menuIcon} />
+          <Text style={styles.menuText}>隐私设置</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuText}>ℹ️ 关于我们</Text>
+          <Ionicons name="information-circle" size={20} color="#333" style={styles.menuIcon} />
+          <Text style={styles.menuText}>关于我们</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.menuItem, styles.logout]}>
+          <Ionicons name="log-out" size={20} color="#FFF" style={styles.menuIcon} />
           <Text style={styles.logoutText}>退出登录</Text>
         </TouchableOpacity>
       </View>
@@ -57,8 +62,9 @@ const styles = StyleSheet.create({
   label: { color: '#666666', fontSize: 14 },
   value: { color: '#333333', fontSize: 14 },
   menu: { margin: 10 },
-  menuItem: { backgroundColor: '#FFFFFF', padding: 16, borderRadius: 10, marginBottom: 8 },
+  menuItem: { backgroundColor: '#FFFFFF', padding: 16, borderRadius: 10, marginBottom: 8, flexDirection: 'row', alignItems: 'center' },
+  menuIcon: { marginRight: 12 },
   menuText: { fontSize: 16, color: '#333333' },
   logout: { backgroundColor: '#FF3B30', marginTop: 20 },
-  logoutText: { fontSize: 16, color: '#FFFFFF', textAlign: 'center', fontWeight: 'bold' },
+  logoutText: { fontSize: 16, color: '#FFFFFF', fontWeight: 'bold' },
 });

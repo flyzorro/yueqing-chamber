@@ -1,13 +1,14 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
 const services = [
-  { id: '1', title: '法律咨询', description: '专业律师团队提供法律咨询服务', icon: '⚖️' },
-  { id: '2', title: '财税服务', description: '税务筹划、财务咨询等专业服务', icon: '💰' },
-  { id: '3', title: '融资对接', description: '银行、投资机构融资对接服务', icon: '🏦' },
-  { id: '4', title: '人才招聘', description: '企业人才招聘与猎头服务', icon: '👥' },
-  { id: '5', title: '商务考察', description: '国内外商务考察与交流活动', icon: '✈️' },
-  { id: '6', title: '培训学习', description: '企业管理、技能培训课程', icon: '📚' },
+  { id: '1', title: '法律咨询', description: '专业律师团队提供法律咨询服务', icon: 'document-text' },
+  { id: '2', title: '财税服务', description: '税务筹划、财务咨询等专业服务', icon: 'cash' },
+  { id: '3', title: '融资对接', description: '银行、投资机构融资对接服务', icon: 'business' },
+  { id: '4', title: '人才招聘', description: '企业人才招聘与猎头服务', icon: 'people' },
+  { id: '5', title: '商务考察', description: '国内外商务考察与交流活动', icon: 'airplane' },
+  { id: '6', title: '培训学习', description: '企业管理、技能培训课程', icon: 'book' },
 ];
 
 export default function ServicesScreen() {
@@ -21,7 +22,7 @@ export default function ServicesScreen() {
         <View style={styles.grid}>
           {services.map((service) => (
             <TouchableOpacity key={service.id} style={styles.serviceCard}>
-              <Text style={styles.serviceIcon}>{service.icon}</Text>
+              <Ionicons name={service.icon as any} size={32} color="#007AFF" />
               <Text style={styles.serviceTitle}>{service.title}</Text>
               <Text style={styles.serviceDescription}>{service.description}</Text>
             </TouchableOpacity>
@@ -74,15 +75,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  serviceIcon: {
-    fontSize: 32,
-    marginBottom: 8,
-  },
   serviceTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#000000',
     marginBottom: 4,
+    marginTop: 8,
   },
   serviceDescription: {
     fontSize: 12,
