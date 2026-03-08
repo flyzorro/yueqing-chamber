@@ -5,12 +5,13 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node src/index.ts",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "start": "node dist/index.js",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "lint": "eslint src --ext .ts",
-    "docs": "npx swagger-ui-express serve src/swagger.json"
+    "docs": "npx swagger-ui-express serve src/swagger.json",
+    "postinstall": "prisma generate"
   },
   "swagger": {
     "path": "/api/docs",
