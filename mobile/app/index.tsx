@@ -1,98 +1,56 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
+  const router = useRouter();
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <Text style={styles.title}>乐清商会</Text>
-          <Text style={styles.subtitle}>欢迎回来</Text>
-        </View>
-        
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>商会动态</Text>
-          <Text style={styles.cardContent}>查看最新商会新闻和活动通知</Text>
-        </View>
+      <View style={styles.header}>
+        <Text style={styles.title}>乐清商会</Text>
+        <Text style={styles.subtitle}>欢迎回来</Text>
+      </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>快捷入口</Text>
-          <View style={styles.quickLinks}>
-            <TouchableOpacity style={styles.quickLink}>
-              <Text style={styles.quickLinkText}>会员名录</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.quickLink}>
-              <Text style={styles.quickLinkText}>活动报名</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.quickLink}>
-              <Text style={styles.quickLinkText}>服务申请</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
+      <View style={styles.menu}>
+        <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/members')}>
+          <Text style={styles.menuIcon}>👥</Text>
+          <Text style={styles.menuText}>会员中心</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/activities')}>
+          <Text style={styles.menuIcon}>📅</Text>
+          <Text style={styles.menuText}>活动管理</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/services')}>
+          <Text style={styles.menuIcon}>🤝</Text>
+          <Text style={styles.menuText}>商会服务</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/profile')}>
+          <Text style={styles.menuIcon}>👤</Text>
+          <Text style={styles.menuText}>个人中心</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.info}>
+        <Text style={styles.infoText}>会员数: 5</Text>
+        <Text style={styles.infoText}>活动数: 3</Text>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F2F2F7',
-  },
-  scrollContent: {
-    padding: 16,
-  },
-  header: {
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#000000',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#8E8E93',
-    marginTop: 4,
-  },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#000000',
-  },
-  cardContent: {
-    fontSize: 14,
-    color: '#8E8E93',
-  },
-  quickLinks: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 12,
-  },
-  quickLink: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    flex: 1,
-    marginHorizontal: 4,
-    alignItems: 'center',
-  },
-  quickLinkText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '500',
-  },
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  header: { padding: 20, alignItems: 'center', backgroundColor: '#007AFF' },
+  title: { fontSize: 28, fontWeight: 'bold', color: '#FFFFFF' },
+  subtitle: { fontSize: 16, color: '#E0E0E0', marginTop: 4 },
+  menu: { flexDirection: 'row', flexWrap: 'wrap', padding: 10, justifyContent: 'space-around' },
+  menuItem: { width: '45%', backgroundColor: '#F5F5F5', padding: 20, margin: 5, borderRadius: 10, alignItems: 'center' },
+  menuIcon: { fontSize: 32 },
+  menuText: { fontSize: 14, marginTop: 8, color: '#333333' },
+  info: { padding: 20, alignItems: 'center' },
+  infoText: { fontSize: 14, color: '#666666', marginVertical: 2 },
 });
