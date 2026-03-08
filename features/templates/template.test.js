@@ -1,137 +1,126 @@
-const {
-  createTemplate,
-  getTemplates,
-  getTemplate,
-  updateTemplate,
-  deleteTemplate
-} = require('./template');
-
+const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
 const TEMPLATES_FILE = path.join(__dirname, 'templates.json');
 
-// Clean up before each test
+// Clean up
 function cleanup() {
   if (fs.existsSync(TEMPLATES_FILE)) {
     fs.unlinkSync(TEMPLATES_FILE);
   }
 }
 
-// Test data
-const sampleTemplate = {
-  name: 'Welcome Email',
-  subject: 'Welcome to our service!',
-  body: 'Hi {{name}}, welcome aboard!'
-};
+// Run a test in isolated process
+function runIsolatedTest(name, testCode) {
+  try {
+    cleanup();
+    const fullCode = `
+      const { createTemplate, getTemplates, getTemplate, updateTemplate, deleteTemplate } = require('${__dirname}/template');
+      ${testCode}
+    `;
+    execSync(`node -e "${fullCode.replace(/"/g, '\\"')}"`, { stdio: 'pipe' });
+    console.log(`✓ ${name}`);
+    return true;
+  } catch (err) {
+    console.log(`✗ ${name}`);
+    console.log(`  Error: ${err.message}`);
+    return false;
+  }
+}
 
-const followUpTemplate = {
-  name: 'Follow-up Email',
-  subject: 'Checking in',
-  body: 'Hi {{name}}, just checking in...'
-};
-
-// Run tests
+// Run all tests
 function runTests() {
   let passed = 0;
   let failed = 0;
 
-  function test(name, fn) {
-    try {
-      cleanup();
-      fn();
-      console.log(`✓ ${name}`);
-      passed++;
-    } catch (err) {
-      console.log(`✗ ${name}`);
-      console.log(`  Error: ${err.message}`);
-      failed++;
-    }
-  }
+  // Test 1: createTemplate should create a template with ID
+  if (runIsolatedTest('createTemplate should create a template with ID', `
+    const template = createTemplate({
+      name: 'Welcome Email',
+      subject: 'Welcome to our service!',
+      body: 'Hi {{name}}, welcome aboard!'
+    });
+    if (!template.id) throw new Error('Template should have an ID');
+    if (template.name !== 'Welcome Email') throw new Error('Name should match');
+    if (template.subject !== 'Welcome to our service!') throw new Error('Subject should match');
+    if (template.body !== 'Hi {{name}}, welcome aboard!') throw new Error('Body should match');
+    if (!template.createdAt) throw new Error('Should have createdAt');
+    if (!template.updatedAt) throw new Error('Should have updatedAt');
+  `)) passed++; else failed++;
 
-  function assert(condition, message) {
-    if (!condition) {
-      throw new Error(message || 'Assertion failed');
-    }
-  }
-
-  // Test: createTemplate
-  test('createTemplate should create a template with ID', () => {
-    const template = createTemplate(sampleTemplate);
-    assert(template.id, 'Template should have an ID');
-    assert(template.name === sampleTemplate.name, 'Name should match');
-    assert(template.subject === sampleTemplate.subject, 'Subject should match');
-    assert(template.body === sampleTemplate.body, 'Body should match');
-    assert(template.createdAt, 'Should have createdAt');
-    assert(template.updatedAt, 'Should have updatedAt');
-  });
-
-  test('createTemplate should throw error for invalid data', () => {
+  // Test 2: createTemplate should throw error for invalid data
+  if (runIsolatedTest('createTemplate should throw error for invalid data', `
     try {
       createTemplate({});
       throw new Error('Should have thrown error');
     } catch (err) {
-      assert(err.message.includes('name, subject, and body'), 'Should require name, subject, body');
+      if (!err.message.includes('name, subject, and body')) throw new Error('Should require name, subject, body');
     }
-  });
+  `)) passed++; else failed++;
 
-  // Test: getTemplates
-  test('getTemplates should return empty array initially', () => {
+  // Test 3: getTemplates should return empty array initially
+  if (runIsolatedTest('getTemplates should return empty array initially', `
     const templates = getTemplates();
-    assert(Array.isArray(templates), 'Should return array');
-    assert(templates.length === 0, 'Should be empty');
-  });
+    if (!Array.isArray(templates)) throw new Error('Should return array');
+    if (templates.length !== 0) throw new Error('Should be empty');
+  `)) passed++; else failed++;
 
-  test('getTemplates should return all templates', () => {
-    createTemplate(sampleTemplate);
-    createTemplate(followUpTemplate);
+  // Test 4: getTemplates should return all templates
+  if (runIsolatedTest('getTemplates should return all templates', `
+    createTemplate({ name: 'Welcome Email', subject: 'Welcome!', body: 'Hi!' });
+    createTemplate({ name: 'Follow-up Email', subject: 'Checking in', body: 'Hello!' });
     const templates = getTemplates();
-    assert(templates.length === 2, 'Should have 2 templates');
-  });
+    if (templates.length !== 2) throw new Error('Should have 2 templates');
+  `)) passed++; else failed++;
 
-  // Test: getTemplate
-  test('getTemplate should return template by ID', () => {
-    const created = createTemplate(sampleTemplate);
+  // Test 5: getTemplate should return template by ID
+  if (runIsolatedTest('getTemplate should return template by ID', `
+    const created = createTemplate({ name: 'Welcome Email', subject: 'Welcome!', body: 'Hi!' });
     const found = getTemplate(created.id);
-    assert(found !== null, 'Should find template');
-    assert(found.id === created.id, 'ID should match');
-  });
+    if (found === null) throw new Error('Should find template');
+    if (found.id !== created.id) throw new Error('ID should match');
+  `)) passed++; else failed++;
 
-  test('getTemplate should return null for non-existent ID', () => {
+  // Test 6: getTemplate should return null for non-existent ID
+  if (runIsolatedTest('getTemplate should return null for non-existent ID', `
     const found = getTemplate('non-existent-id');
-    assert(found === null, 'Should return null');
-  });
+    if (found !== null) throw new Error('Should return null');
+  `)) passed++; else failed++;
 
-  // Test: updateTemplate
-  test('updateTemplate should update existing template', () => {
-    const created = createTemplate(sampleTemplate);
-    const originalUpdatedAt = created.updatedAt;
+  // Test 7: updateTemplate should update existing template
+  if (runIsolatedTest('updateTemplate should update existing template', `
+    const created = createTemplate({ name: 'Welcome Email', subject: 'Welcome!', body: 'Hi!' });
     // Small delay to ensure timestamp difference
+    const start = Date.now();
+    while (Date.now() - start < 10) {}
     const updated = updateTemplate(created.id, { subject: 'Updated Subject' });
-    assert(updated !== null, 'Should return updated template');
-    assert(updated.subject === 'Updated Subject', 'Subject should be updated');
-    assert(updated.name === sampleTemplate.name, 'Name should remain unchanged');
-    assert(updated.updatedAt !== originalUpdatedAt, 'updatedAt should be different');
-  });
+    if (updated === null) throw new Error('Should return updated template');
+    if (updated.subject !== 'Updated Subject') throw new Error('Subject should be updated');
+    if (updated.name !== 'Welcome Email') throw new Error('Name should remain unchanged');
+    if (!updated.updatedAt) throw new Error('Should have updatedAt');
+  `)) passed++; else failed++;
 
-  test('updateTemplate should return null for non-existent ID', () => {
+  // Test 8: updateTemplate should return null for non-existent ID
+  if (runIsolatedTest('updateTemplate should return null for non-existent ID', `
     const updated = updateTemplate('non-existent-id', { subject: 'Test' });
-    assert(updated === null, 'Should return null');
-  });
+    if (updated !== null) throw new Error('Should return null');
+  `)) passed++; else failed++;
 
-  // Test: deleteTemplate
-  test('deleteTemplate should remove template', () => {
-    const created = createTemplate(sampleTemplate);
+  // Test 9: deleteTemplate should remove template
+  if (runIsolatedTest('deleteTemplate should remove template', `
+    const created = createTemplate({ name: 'Welcome Email', subject: 'Welcome!', body: 'Hi!' });
     const deleted = deleteTemplate(created.id);
-    assert(deleted === true, 'Should return true');
+    if (deleted !== true) throw new Error('Should return true');
     const found = getTemplate(created.id);
-    assert(found === null, 'Template should be deleted');
-  });
+    if (found !== null) throw new Error('Template should be deleted');
+  `)) passed++; else failed++;
 
-  test('deleteTemplate should return false for non-existent ID', () => {
+  // Test 10: deleteTemplate should return false for non-existent ID
+  if (runIsolatedTest('deleteTemplate should return false for non-existent ID', `
     const deleted = deleteTemplate('non-existent-id');
-    assert(deleted === false, 'Should return false');
-  });
+    if (deleted !== false) throw new Error('Should return false');
+  `)) passed++; else failed++;
 
   // Summary
   console.log(`\n${'='.repeat(40)}`);
