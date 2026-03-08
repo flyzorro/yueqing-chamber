@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
 export interface User {
   id: string;
@@ -7,18 +7,16 @@ export interface User {
   avatar?: string;
 }
 
-const TOKEN_KEY = '@yueqing_chamber:token';
-const USER_KEY = '@yueqing_chamber:user';
+const TOKEN_KEY = 'yueqing_chamber_token';
+const USER_KEY = 'yueqing_chamber_user';
 
 /**
- * 保存登录信息
+ * 保存登录信息（使用加密存储）
  */
 export async function saveAuthData(token: string, user: User): Promise<void> {
   try {
-    await AsyncStorage.multiSet([
-      [TOKEN_KEY, token],
-      [USER_KEY, JSON.stringify(user)]
-    ]);
+    await SecureStore.setItemAsync(TOKEN_KEY, token);
+    await SecureStore.setItemAsync(USER_KEY, JSON.stringify(user));
   } catch (error) {
     console.error('Save auth data error:', error);
     throw error;
@@ -30,7 +28,7 @@ export async function saveAuthData(token: string, user: User): Promise<void> {
  */
 export async function getToken(): Promise<string | null> {
   try {
-    return await AsyncStorage.getItem(TOKEN_KEY);
+    return await SecureStore.getItemAsync(TOKEN_KEY);
   } catch (error) {
     console.error('Get token error:', error);
     return null;
@@ -42,7 +40,7 @@ export async function getToken(): Promise<string | null> {
  */
 export async function getUser(): Promise<User | null> {
   try {
-    const userJson = await AsyncStorage.getItem(USER_KEY);
+    const userJson = await SecureStore.getItemAsync(USER_KEY);
     return userJson ? JSON.parse(userJson) : null;
   } catch (error) {
     console.error('Get user error:', error);
@@ -63,7 +61,8 @@ export async function isLoggedIn(): Promise<boolean> {
  */
 export async function clearAuthData(): Promise<void> {
   try {
-    await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
+    await SecureStore.deleteItemAsync(TOKEN_KEY);
+    await SecureStore.deleteItemAsync(USER_KEY);
   } catch (error) {
     console.error('Clear auth data error:', error);
     throw error;

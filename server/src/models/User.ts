@@ -47,8 +47,8 @@ class UserStore {
       return null;
     }
 
-    // 密码加密
-    const salt = await bcrypt.genSalt(10);
+    // 密码加密（使用更强的 rounds）
+    const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(request.password, salt);
 
     const user: User = {
