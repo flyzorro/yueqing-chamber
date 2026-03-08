@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, RefreshControl, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
 interface Activity {
   id: string;
@@ -25,9 +26,10 @@ export default function ActivitiesScreen() {
       const json = await response.json();
       
       if (json.success) {
+        const currentPage = refresh ? 1 : pageNum;
         const newActivities = json.data.map((item: Activity, index: number) => ({
           ...item,
-          uniqueId: `${item.id}_${pageNum}_${index}`
+          uniqueId: `${item.id}_${currentPage}_${index}`
         }));
         setActivities(refresh ? newActivities : [...activities, ...newActivities]);
         setHasMore(json.data.length === 10);
@@ -77,9 +79,18 @@ export default function ActivitiesScreen() {
   const renderItem = ({ item }: { item: Activity }) => (
     <View style={styles.card}>
       <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.info}>📅 {new Date(item.date).toLocaleDateString()}</Text>
-      <Text style={styles.info}>📍 {item.location}</Text>
-      <Text style={styles.info}>👥 {item.currentParticipants}/{item.maxParticipants}</Text>
+      <View style={styles.infoRow}>
+        <Ionicons name="calendar" size={16} color="#666" />
+        <Text style={styles.info}>{new Date(item.date).toLocaleDateString()}</Text>
+      </View>
+      <View style={styles.infoRow}>
+        <Ionicons name="location" size={16} color="#666" />
+        <Text style={styles.info}>{item.location}</Text>
+      </View>
+      <View style={styles.infoRow}>
+        <Ionicons name="people" size={16} color="#666" />
+        <Text style={styles.info}>{item.currentParticipants}/{item.maxParticipants}</Text>
+      </View>
       <TouchableOpacity style={styles.button} onPress={() => register(item.id)}>
         <Text style={styles.buttonText}>报名</Text>
       </TouchableOpacity>
@@ -113,7 +124,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F5F5' },
   card: { backgroundColor: 'white', padding: 16, margin: 8, borderRadius: 8 },
   title: { fontSize: 18, fontWeight: 'bold' },
-  info: { fontSize: 14, color: '#666', marginTop: 4 },
+  infoRow: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
+  info: { fontSize: 14, color: '#666', marginLeft: 6 },
   button: { backgroundColor: '#007AFF', padding: 12, borderRadius: 8, marginTop: 12 },
   buttonText: { color: 'white', textAlign: 'center', fontWeight: 'bold' },
 });
