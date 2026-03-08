@@ -1,31 +1,78 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { getUser, clearAuthData, User } from '../utils/auth';
 
 export default function ProfileScreen() {
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadUser();
+  }, []);
+
+  const loadUser = async () => {
+    try {
+      const userData = await getUser();
+      setUser(userData);
+    } catch (error) {
+      console.error('Load user error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    Alert.alert('确认', '确定要退出登录吗？', [
+      { text: '取消', style: 'cancel' },
+      { 
+        text: '确定', 
+        onPress: async () => {
+          try {
+            await clearAuthData();
+            setUser(null);
+            router.replace('/login');
+          } catch (error) {
+            console.error('Logout error:', error);
+          }
+        }
+      }
+    ]);
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.loadingText}>加载中...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (!user) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.notLoggedIn}>
+          <Ionicons name="person-circle-outline" size={80} color="#CCC" />
+          <Text style={styles.notLoggedInText}>未登录</Text>
+          <TouchableOpacity style={styles.loginButton} onPress={() => router.push('/login')}>
+            <Text style={styles.loginButtonText}>登录 / 注册</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>张</Text>
+          <Text style={styles.avatarText}>{user.name.charAt(0)}</Text>
         </View>
-        <Text style={styles.name}>张三</Text>
-        <Text style={styles.company}>ABC科技有限公司</Text>
-      </View>
-
-      <View style={styles.info}>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>职位</Text>
-          <Text style={styles.value}>总经理</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>电话</Text>
-          <Text style={styles.value}>13800138000</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>入会时间</Text>
-          <Text style={styles.value}>2024-01-15</Text>
-        </View>
+        <Text style={styles.name}>{user.name}</Text>
+        <Text style={styles.company}>{user.phone}</Text>
       </View>
 
       <View style={styles.menu}>
@@ -41,7 +88,7 @@ export default function ProfileScreen() {
           <Ionicons name="information-circle" size={20} color="#333" style={styles.menuIcon} />
           <Text style={styles.menuText}>关于我们</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.menuItem, styles.logout]}>
+        <TouchableOpacity style={[styles.menuItem, styles.logout]} onPress={handleLogout}>
           <Ionicons name="log-out" size={20} color="#FFF" style={styles.menuIcon} />
           <Text style={styles.logoutText}>退出登录</Text>
         </TouchableOpacity>
@@ -52,15 +99,16 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F5F5' },
+  loadingText: { textAlign: 'center', marginTop: 50, color: '#999', fontSize: 16 },
+  notLoggedIn: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  notLoggedInText: { marginTop: 20, fontSize: 18, color: '#999' },
+  loginButton: { marginTop: 30, backgroundColor: '#007AFF', paddingHorizontal: 40, paddingVertical: 15, borderRadius: 25 },
+  loginButtonText: { color: '#FFF', fontSize: 16, fontWeight: 'bold' },
   header: { backgroundColor: '#007AFF', padding: 30, alignItems: 'center' },
   avatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center' },
   avatarText: { fontSize: 32, color: '#007AFF', fontWeight: 'bold' },
   name: { fontSize: 24, fontWeight: 'bold', color: '#FFFFFF', marginTop: 12 },
   company: { fontSize: 14, color: '#E0E0E0', marginTop: 4 },
-  info: { backgroundColor: '#FFFFFF', margin: 10, borderRadius: 10, padding: 10 },
-  infoRow: { flexDirection: 'row', justifyContent: 'space-between', padding: 12, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
-  label: { color: '#666666', fontSize: 14 },
-  value: { color: '#333333', fontSize: 14 },
   menu: { margin: 10 },
   menuItem: { backgroundColor: '#FFFFFF', padding: 16, borderRadius: 10, marginBottom: 8, flexDirection: 'row', alignItems: 'center' },
   menuIcon: { marginRight: 12 },
