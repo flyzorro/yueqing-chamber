@@ -1,12 +1,14 @@
-import { Router } from 'express';
-import membersRouter from './members';
-import activitiesRouter from './activities';
-import authRouter from './auth';
+import { Router } from './routes';
 
 const router = Router();
 
-router.use('/members', membersRouter);
-router.use('/activities', activitiesRouter);
-router.use('/auth', authRouter);
+// 会员管理
+router.use('/members', require('./members'));
+
+// 活动管理
+router.use('/activities', require('./activities'));
+
+// 认证（待实现）
+router.use('/auth', require('./auth'));
 
 export default router;

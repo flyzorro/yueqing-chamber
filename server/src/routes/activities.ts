@@ -1,30 +1,31 @@
 import { Router } from 'express';
+import {
+  getActivities,
+  getActivity,
+  createActivity,
+  updateActivity,
+  deleteActivity,
+  registerActivity
+} from '../controllers/activityController';
 
 const router = Router();
 
 // GET /api/activities - 获取活动列表
-router.get('/', (req, res) => {
-  res.json({ message: '获取活动列表', data: [] });
-});
+router.get('/', getActivities);
 
 // GET /api/activities/:id - 获取单个活动
-router.get('/:id', (req, res) => {
-  res.json({ message: '获取活动详情', id: req.params.id });
-});
+router.get('/:id', getActivity);
 
 // POST /api/activities - 创建活动
-router.post('/', (req, res) => {
-  res.json({ message: '创建活动', data: req.body });
-});
+router.post('/', createActivity);
 
 // PUT /api/activities/:id - 更新活动
-router.put('/:id', (req, res) => {
-  res.json({ message: '更新活动', id: req.params.id, data: req.body });
-});
+router.put('/:id', updateActivity);
 
 // DELETE /api/activities/:id - 删除活动
-router.delete('/:id', (req, res) => {
-  res.json({ message: '删除活动', id: req.params.id });
-});
+router.delete('/:id', deleteActivity);
+
+// POST /api/activities/:id/register - 报名活动
+router.post('/:id/register', registerActivity);
 
 export default router;
