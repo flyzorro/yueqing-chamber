@@ -1,119 +1,114 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, FlatList, StyleSheet, RefreshControl, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const mockActivities = [
-  { id: '1', title: '2024年度商会年会', date: '2024-12-28', location: '乐清大酒店', status: '报名中' },
-  { id: '2', title: '企业家交流沙龙', date: '2024-12-15', location: '商会会议室', status: '即将开始' },
-  { id: '3', title: '商务考察活动', date: '2024-12-20', location: '杭州', status: '报名中' },
-];
+interface Activity {
+  id: string;
+  title: string;
+  date: string;
+  location: string;
+  currentParticipants: number;
+  maxParticipants: number;
+}
 
 export default function ActivitiesScreen() {
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  const fetchActivities = async (pageNum: number, refresh = false) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/activities?page=${pageNum}&limit=10`);
+      const json = await response.json();
+      
+      if (json.success) {
+        setActivities(refresh ? json.data : [...activities, ...json.data]);
+        setHasMore(json.data.length === 10);
+      }
+    } catch (error) {
+      console.error('Failed to fetch activities:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const register = async (id: string) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/activities/${id}/register`, { method: 'POST' });
+      const json = await response.json();
+      
+      if (json.success) {
+        alert('报名成功！');
+        onRefresh();
+      } else {
+        alert(json.error || '报名失败');
+      }
+    } catch (error) {
+      alert('报名失败');
+    }
+  };
+
+  useEffect(() => {
+    fetchActivities(1);
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setPage(1);
+    fetchActivities(1, true);
+  };
+
+  const onLoadMore = () => {
+    if (hasMore && !loading) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchActivities(nextPage);
+    }
+  };
+
+  const renderItem = ({ item }: { item: Activity }) => (
+    <View style={styles.card}>
+      <Text style={styles.title}>{item.title}</Text>
+      <Text style={styles.info}>📅 {new Date(item.date).toLocaleDateString()}</Text>
+      <Text style={styles.info}>📍 {item.location}</Text>
+      <Text style={styles.info}>👥 {item.currentParticipants}/{item.maxParticipants}</Text>
+      <TouchableOpacity style={styles.button} onPress={() => register(item.id)}>
+        <Text style={styles.buttonText}>报名</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>活动管理</Text>
-      </View>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {mockActivities.map((activity) => (
-          <View key={activity.id} style={styles.activityCard}>
-            <View style={styles.activityHeader}>
-              <Text style={styles.activityTitle}>{activity.title}</Text>
-              <View style={[
-                styles.statusBadge,
-                activity.status === '报名中' ? styles.statusActive : styles.statusUpcoming
-              ]}>
-                <Text style={styles.statusText}>{activity.status}</Text>
-              </View>
-            </View>
-            <View style={styles.activityDetails}>
-              <Text style={styles.detailText}>📅 {activity.date}</Text>
-              <Text style={styles.detailText}>📍 {activity.location}</Text>
-            </View>
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonText}>查看详情</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-      </ScrollView>
+      <FlatList
+        data={activities}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        onEndReached={onLoadMore}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={hasMore ? <ActivityIndicator /> : null}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F2F2F7',
-  },
-  header: {
-    padding: 16,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000000',
-  },
-  scrollContent: {
-    padding: 16,
-  },
-  activityCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  activityHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  activityTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000000',
-    flex: 1,
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  statusActive: {
-    backgroundColor: '#34C759',
-  },
-  statusUpcoming: {
-    backgroundColor: '#FF9500',
-  },
-  statusText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  activityDetails: {
-    marginBottom: 12,
-  },
-  detailText: {
-    fontSize: 14,
-    color: '#8E8E93',
-    marginBottom: 4,
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '500',
-  },
+  container: { flex: 1, backgroundColor: '#F5F5F5' },
+  card: { backgroundColor: 'white', padding: 16, margin: 8, borderRadius: 8 },
+  title: { fontSize: 18, fontWeight: 'bold' },
+  info: { fontSize: 14, color: '#666', marginTop: 4 },
+  button: { backgroundColor: '#007AFF', padding: 12, borderRadius: 8, marginTop: 12 },
+  buttonText: { color: 'white', textAlign: 'center', fontWeight: 'bold' },
 });
