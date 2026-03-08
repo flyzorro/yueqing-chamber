@@ -1,11 +1,22 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import * as Sentry from '@sentry/node';
 import swaggerUi from 'swagger-ui-express';
 import routes from './routes';
 import swaggerDocument from './swagger.json';
 
 dotenv.config();
+
+// 初始化 Sentry 错误监控
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || 'development',
+    tracesSampleRate: 1.0,
+  });
+  console.log('✅ Sentry 错误监控已启用');
+}
 
 const app = express();
 
@@ -18,6 +29,12 @@ if (!process.env.JWT_SECRET) {
 app.use(cors());
 app.use(express.json());
 
+// Sentry 请求处理器（必须在路由之前）
+if (process.env.SENTRY_DSN) {
+  app.use(Sentry.Handlers.requestHandler());
+  app.use(Sentry.Handlers.tracingHandler());
+}
+
 // Swagger API 文档
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
@@ -28,6 +45,11 @@ app.use('/api', routes);
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// Sentry 错误处理器（必须在路由之后）
+if (process.env.SENTRY_DSN) {
+  app.use(Sentry.Handlers.errorHandler());
+}
 
 // Vercel 导出
 export default app;
