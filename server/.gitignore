@@ -20,3 +20,4 @@ yarn-error.*
 
 # Testing
 coverage/
+/src/generated/prisma

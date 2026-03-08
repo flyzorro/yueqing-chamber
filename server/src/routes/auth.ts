@@ -98,7 +98,7 @@ router.post('/login', async (req: Request, res: Response) => {
     }
 
     // 查找用户
-    const user = userStore.getByPhone(phone);
+    const user = await userStore.getByPhone(phone);
     
     if (!user) {
       res.status(401).json({ 
@@ -151,7 +151,7 @@ router.post('/login', async (req: Request, res: Response) => {
  * GET /api/auth/me
  * 获取当前用户信息（需要认证）
  */
-router.get('/me', authenticate, (req: Request, res: Response) => {
+router.get('/me', authenticate, async (req: Request, res: Response) => {
   try {
     if (!req.user) {
       res.status(401).json({ 
@@ -161,7 +161,7 @@ router.get('/me', authenticate, (req: Request, res: Response) => {
       return;
     }
 
-    const user = userStore.getById(req.user.userId);
+    const user = await userStore.getById(req.user.userId);
     
     if (!user) {
       res.status(404).json({ 

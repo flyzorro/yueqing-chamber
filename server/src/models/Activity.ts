@@ -1,4 +1,5 @@
-// Activity.ts - 活动数据模型
+import prisma from '../lib/prisma';
+
 export interface Activity {
   id: string;
   title: string;
@@ -7,59 +8,126 @@ export interface Activity {
   location: string;
   maxParticipants: number;
   currentParticipants: number;
-  status: 'upcoming' | 'ongoing' | 'ended';
+  status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
   createdAt: Date;
+  updatedAt: Date;
 }
 
-export class ActivityModel {
-  private activities: Map<string, Activity> = new Map();
+export interface CreateActivityRequest {
+  title: string;
+  description: string;
+  date: string | Date;
+  location: string;
+  maxParticipants: number;
+  status?: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
+}
 
-  generateId(): string {
-    // 修复：使用 substring 替代弃用的 substr
-    return `activity_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+export interface UpdateActivityRequest {
+  title?: string;
+  description?: string;
+  date?: string | Date;
+  location?: string;
+  maxParticipants?: number;
+  currentParticipants?: number;
+  status?: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
+}
+
+export class ActivityStore {
+  // 获取所有活动
+  async getAll(): Promise<Activity[]> {
+    const activities = await prisma.activity.findMany({
+      orderBy: { date: 'asc' }
+    });
+    return activities;
   }
 
-  create(data: Omit<Activity, 'id' | 'createdAt'>): Activity {
-    const id = this.generateId();
-    const activity: Activity = {
-      ...data,
-      id,
-      createdAt: new Date()
-    };
-    this.activities.set(id, activity);
+  // 分页获取活动
+  async getPaginated(page: number = 1, limit: number = 10): Promise<{
+    data: Activity[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const skip = (page - 1) * limit;
+    
+    const [data, total] = await Promise.all([
+      prisma.activity.findMany({
+        skip,
+        take: limit,
+        orderBy: { date: 'asc' }
+      }),
+      prisma.activity.count()
+    ]);
+
+    return { data, total, page, limit };
+  }
+
+  // 根据 ID 获取活动
+  async getById(id: string): Promise<Activity | null> {
+    const activity = await prisma.activity.findUnique({
+      where: { id }
+    });
     return activity;
   }
 
-  findById(id: string): Activity | undefined {
-    return this.activities.get(id);
+  // 创建活动
+  async create(request: CreateActivityRequest): Promise<Activity> {
+    const activity = await prisma.activity.create({
+      data: {
+        title: request.title,
+        description: request.description,
+        date: new Date(request.date),
+        location: request.location,
+        maxParticipants: request.maxParticipants,
+        status: request.status || 'upcoming'
+      }
+    });
+    return activity;
   }
 
-  findAll(): Activity[] {
-    return Array.from(this.activities.values());
+  // 更新活动
+  async update(id: string, request: UpdateActivityRequest): Promise<Activity | null> {
+    const data: any = { ...request };
+    if (request.date) {
+      data.date = new Date(request.date);
+    }
+    
+    const activity = await prisma.activity.update({
+      where: { id },
+      data
+    });
+    return activity;
   }
 
-  update(id: string, data: Partial<Activity>): Activity | undefined {
-    const activity = this.activities.get(id);
-    if (!activity) return undefined;
-
-    const updated = { ...activity, ...data };
-    this.activities.set(id, updated);
-    return updated;
-  }
-
-  delete(id: string): boolean {
-    return this.activities.delete(id);
-  }
-
-  register(id: string): boolean {
-    const activity = this.activities.get(id);
-    if (!activity) return false;
-    if (activity.currentParticipants >= activity.maxParticipants) return false;
-
-    activity.currentParticipants++;
-    this.activities.set(id, activity);
+  // 删除活动
+  async delete(id: string): Promise<boolean> {
+    await prisma.activity.delete({
+      where: { id }
+    });
     return true;
+  }
+
+  // 报名活动
+  async register(id: string): Promise<{ success: boolean; error?: string }> {
+    const activity = await this.getById(id);
+    
+    if (!activity) {
+      return { success: false, error: '活动不存在' };
+    }
+
+    if (activity.currentParticipants >= activity.maxParticipants) {
+      return { success: false, error: '报名人数已满' };
+    }
+
+    await prisma.activity.update({
+      where: { id },
+      data: {
+        currentParticipants: activity.currentParticipants + 1
+      }
+    });
+
+    return { success: true };
   }
 }
 
-export const activityModel = new ActivityModel();
+export const activityStore = new ActivityStore();
