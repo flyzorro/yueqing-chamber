@@ -27,10 +27,17 @@ app.get('/health', (req, res) => {
 // Vercel 导出
 export default app;
 
-// 本地开发启动
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`🚀 服务器运行在 http://localhost:${PORT}`);
+// 启动服务器 (Vercel 会忽略 listen，Railway/本地会执行)
+const PORT = process.env.PORT || 3000;
+const server = app.listen(PORT, () => {
+  console.log(`🚀 服务器运行在 http://localhost:${PORT}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully...');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
   });
-}
+});
