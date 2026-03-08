@@ -5,3 +5,45 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model User {
+  id        String   @id @default(cuid())
+  phone     String   @unique
+  password  String
+  name      String
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Member {
+  id         String   @id @default(cuid())
+  name       String
+  phone      String
+  email      String?
+  company    String
+  position   String?
+  joinDate   DateTime @default(now())
+  status     String   @default("active")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([phone])
+  @@index([status])
+}
+
+model Activity {
+  id                  String   @id @default(cuid())
+  title               String
+  description         String
+  date                DateTime
+  location            String
+  maxParticipants     Int
+  currentParticipants Int      @default(0)
+  status              String   @default("upcoming")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([date])
+  @@index([status])
+}
