@@ -17,4 +17,4 @@ build/
 
 # Testing
 coverage/
-playwright-report/
+playwright-report/node_modules/
