@@ -11,7 +11,9 @@ describe('ActivityModel', () => {
       description: 'Test Description',
       date: new Date(),
       location: 'Test Location',
-      maxParticipants: 10
+      maxParticipants: 10,
+      currentParticipants: 0,
+      status: 'upcoming'
     });
 
     expect(activity.id).toBeDefined();
@@ -22,7 +24,7 @@ describe('ActivityModel', () => {
   it('should register for an activity', () => {
     const activity = activityModel.create({
       title: 'Test', description: 'Test', date: new Date(),
-      location: 'Test', maxParticipants: 2
+      location: 'Test', maxParticipants: 2, currentParticipants: 0, status: 'upcoming'
     });
 
     expect(activityModel.register(activity.id)).toBe(true);
@@ -34,7 +36,7 @@ describe('ActivityModel', () => {
     for (let i = 0; i < 15; i++) {
       activityModel.create({
         title: `Activity ${i}`, description: 'Test', date: new Date(),
-        location: 'Test', maxParticipants: 10
+        location: 'Test', maxParticipants: 10, currentParticipants: 0, status: 'upcoming'
       });
     }
 
