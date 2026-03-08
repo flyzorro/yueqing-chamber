@@ -9,7 +9,12 @@
     "start": "node dist/index.js",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
-    "lint": "eslint src --ext .ts"
+    "lint": "eslint src --ext .ts",
+    "docs": "npx swagger-ui-express serve src/swagger.json"
+  },
+  "swagger": {
+    "path": "/api/docs",
+    "file": "src/swagger.json"
   },
   "keywords": [
     "express",
