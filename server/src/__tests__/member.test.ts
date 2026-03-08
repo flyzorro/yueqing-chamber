@@ -1,6 +1,6 @@
 import { memberStore } from '../models/memberStore';
 
-describe('MemberModel', () => {
+describe('MemberStore', () => {
   beforeEach(() => {
     // Clear members before each test
     (memberStore as any).members.clear();
@@ -19,17 +19,17 @@ describe('MemberModel', () => {
     expect(member.status).toBe('active');
   });
 
-  it('should get all members with pagination', () => {
+  it('should get all members', () => {
     memberStore.create({ name: 'User 1', phone: '13800138001', company: 'C1' });
     memberStore.create({ name: 'User 2', phone: '13800138002', company: 'C2' });
 
-    const members = memberStore.findAll();
+    const members = memberStore.getAll();
     expect(members).toHaveLength(2);
   });
 
   it('should find member by id', () => {
     const created = memberStore.create({ name: 'User', phone: '13800138000', company: 'C' });
-    const found = memberStore.findById(created.id);
+    const found = memberStore.getById(created.id);
     expect(found).toBeDefined();
     expect(found?.name).toBe('User');
   });
@@ -43,6 +43,19 @@ describe('MemberModel', () => {
   it('should delete a member', () => {
     const created = memberStore.create({ name: 'User', phone: '13800138000', company: 'C' });
     expect(memberStore.delete(created.id)).toBe(true);
-    expect(memberStore.findById(created.id)).toBeUndefined();
+    expect(memberStore.getById(created.id)).toBeUndefined();
+  });
+
+  it('should support pagination', () => {
+    for (let i = 0; i < 25; i++) {
+      memberStore.create({ name: `User ${i}`, phone: `1380013800${i}`, company: 'C' });
+    }
+
+    const page1 = memberStore.getPaginated(1, 10);
+    expect(page1.data).toHaveLength(10);
+    expect(page1.total).toBe(25);
+
+    const page3 = memberStore.getPaginated(3, 10);
+    expect(page3.data).toHaveLength(5);
   });
 });
