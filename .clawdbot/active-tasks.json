@@ -1,0 +1,36 @@
+{
+  "tasks": [
+    {
+      "id": "feat-utils-1741392508",
+      "tmuxSession": "agent-feat-utils",
+      "agent": "qwen",
+      "description": "创建 utils 工具模块和测试",
+      "branch": "feat/utils",
+      "worktree": "/Users/zky/code/clawdbot-test",
+      "startedAt": 1741392508,
+      "status": "running",
+      "attempts": 0,
+      "sessionKey": "agent:main:subagent:d58afeef-43da-4209-9023-e6587be7a2f8",
+      "runId": "95c8c233-d00e-4b97-8982-d5a17084e767"
+    },
+    {
+      "id": "test-hello-1741392000",
+      "tmuxSession": "agent-test-hello-1741392000",
+      "agent": "qwen",
+      "description": "测试：创建 hello.txt 文件",
+      "branch": "test/hello",
+      "worktree": "/Users/zky/code/clawdbot-test",
+      "startedAt": 1741392000,
+      "status": "done",
+      "attempts": 0,
+      "completedAt": 1741392200,
+      "note": "Test completed successfully"
+    }
+  ],
+  "config": {
+    "defaultAgent": "qwen",
+    "checkIntervalMinutes": 10,
+    "maxRetries": 3,
+    "notifyOnComplete": true
+  }
+}

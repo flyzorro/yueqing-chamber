@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>老年人智能助听耳塞 - 芯片方案对比</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 48px;
+            font-weight: bold;
+        }
+        .header h2 {
+            margin: 10px 0 0;
+            font-size: 28px;
+            opacity: 0.9;
+        }
+        .slides-container {
+            padding: 40px;
+        }
+        .slide {
+            margin-bottom: 60px;
+            padding: 30px;
+            border-radius: 15px;
+            background: #f8f9fa;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .slide:hover {
+            transform: translateY(-5px);
+        }
+        .slide-title {
+            color: #2c3e50;
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+        .slide-content {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #34495e;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        tr:hover {
+            background: #f5f7fa;
+        }
+        .chip-table td:first-child {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .highlight {
+            background: #fff9e6;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .check { color: #27ae60; font-weight: bold; }
+        .cross { color: #e74c3c; font-weight: bold; }
+        .warning { color: #f39c12; font-weight: bold; }
+        .recommendation {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .recommendation h3 {
+            margin-top: 0;
+            font-size: 24px;
+        }
+        .footer {
+            text-align: center;
+            padding: 30px;
+            background: #2c3e50;
+            color: white;
+            margin-top: 40px;
+        }
+        .contact-info {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .slide-number {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .slide {
+            position: relative;
+        }
+        .key-point {
+            background: #e8f4fd;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .comparison-chart {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .chip-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            width: 200px;
+            margin: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .chip-card.winner {
+            border: 3px solid #2ecc71;
+            transform: scale(1.05);
+        }
+        .chip-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .chip-price {
+            font-size: 24px;
+            color: #e74c3c;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .chip-rating {
+            color: #f39c12;
+            font-size: 20px;
+        }
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            .slide {
+                page-break-after: always;
+                margin-bottom: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>老年人智能助听耳塞</h1>
+            <h2>芯片方案对比分析</h2>
+            <p style="margin-top: 20px; font-size: 18px; opacity: 0.9;">
+                目标：200元以内成本控制 | 日期：2026年3月6日 | 汇报人：kaiyi Zhang
+            </p>
+        </div>
+
+        <div class="slides-container">
+            <!-- 幻灯片 1: 项目背景 -->
+            <div class="slide">
+                <div class="slide-number">1</div>
+                <div class="slide-title">项目背景</div>
+                <div class="slide-content">
+                    <div class="key-point">
+                        <h3>市场机会</h3>
+                        <ul>
+                            <li><strong>人口老龄化</strong>：中国60岁以上人口超2.8亿</li>
+                            <li><strong>听力问题普遍</strong>：约30%老年人有听力障碍</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="key-point">
+                        <h3>现有产品痛点</h3>
+                        <ul>
+                            <li>传统助听器价格高（¥2000+）</li>
+                            <li>操作复杂，老年人难以上手</li>
+                            <li>外观不时尚，有"病耻感"</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="key-point">
+                        <h3>产品定位</h3>
+                        <p><strong>"听得清，用着简"</strong>的智能助听耳塞</p>
+                        <ul>
+                            <li>助听功能 + 蓝牙耳机二合一</li>
+                            <li>简单易用，一键操作</li>
+                            <li>时尚外观，消除病耻感</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 幻灯片 2: 芯片选择标准 -->
+            <div class="slide">
+                <div class="slide-number">2</div>
+                <div class="slide-title">芯片选择标准</div>
+                <div class="slide-content">
+                    <div class="key-point">
+                        <h3>核心需求</h3>
+                        <ol>
+                            <li><strong>音频处理能力</strong>：支持助听算法</li>
+                            <li><strong>麦克风支持</strong>：至少双麦克风</li>
+                            <li><strong>蓝牙连接</strong>：稳定可靠</li>
+                            <li><strong>低功耗</strong>：续航 > 8小时</li>
+                            <li><strong>成本控制</strong>：芯片价格 < ¥30</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="key-point">
+                        <h3>技术指标</h3>
+                        <ul>
+                            <li>支持波束成形降噪</li>
+                            <li>内置DSP或NPU</li>
+                            <li>蓝牙5.0以上</li>
+                            <li>功耗 < 10mA（音乐播放）</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 幻灯片 3: 候选芯片概览 -->
+            <div class="slide">
+                <div class="slide-number">3</div>
+                <div class="slide-title">候选芯片概览</div>
+                <div class="slide-content">
+                    <table class="chip-table">
+                        <thead>
+                            <tr>
+                                <th>芯片型号</th>
+                                <th>厂商</th>
+                                <th>价格(¥)</th>
+                                <th>蓝牙版本</th>
+                                <th>麦克风</th>
+                                <th>DSP</th>
+                                <th>特点</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>WQ7036A</strong></td>
+                                <td>物奇微电子</td>
+                                <td>25</td>
+                                <td>5.4</td>
+                                <td>8路</td>
+                                <td>HiFi5+NPU</td>
+                                <td>国产旗舰</td>
+                            </tr>
+                            <tr>
+                                <td><strong>WQ7026A</strong></td>
+                                <td>物奇微电子</td>
+                                <td>18</td>
+                                <td>5.3</td>
+                                <td>4路</td>
+                                <td>HiFi4</td>
+                                <td>国产中端</td>
+                            </tr>
+                            <tr>
+                                <td><strong>BES2300HC</strong></td>
+                                <td>恒玄科技</td>
+                                <td>16</td>
+                                <td>5.2</td>
+                                <td>4路</td>
+                                <td>DSP</td>
+                                <td>成熟方案</td>
+                            </tr>
+                            <tr>
+                                <td><strong>BES2500Z</strong></td>
+                                <td>恒玄科技</td>
+                                <td>22</td>
+                                <td>5.2</td>
+                                <td>6路</td>
+                                <td>DSP</td>
+                                <td>性能强</td>
+                            </tr>
+                            <tr>
+                                <td>JL7006F</td>
+                                <td>杰理科技</td>
+                                <td>8</td>
+                                <td>5.1</td>
+                                <td>2路</td>
+                                <td>❌</td>
+                                <td>极致低价</td>
+                            </tr>
+                            <tr>
+                                <td>QCC3020</td>
+                                <td>高通</td>
+                                <td>15</td>
+                                <td>5.0</td>
+                                <td>2路</td>
+                                <td>DSP</td>
+                                <td>国际品牌</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 幻灯片 4: 详细技术对比 -->
+            <div class="slide">
+                <div class="slide-number">4</div>
+                <div class="slide-title">详细技术对比</div>
+                <div class="slide-content">
+                    <div class="comparison-chart">
+                        <div class="chip-card winner">
+                            <div class="chip-name">WQ7036A</div>
+                            <div class="chip-price">¥25</div>
+                            <div class="chip-rating">⭐⭐⭐⭐⭐</div>
+                            <p>HiFi5+NPU</p>
+                            <p>8路麦克风</p>
+                            <p>蓝牙5.4</p>
+                        </div>
+                        <div class="chip-card">
+                            <div class="chip-name">BES2300HC</div>
+                            <div class="chip-price">¥16</div>
+                            <div class="chip-rating">⭐⭐⭐⭐</div>
+                            <p>DSP</p>
+                            <p>4路麦克风</p>
+                            <p>蓝牙5.2</p>
+                        </div>
+                        <div class="chip-card">
+                            <div class="chip-name">WQ7026A</div>
+                            <div class="chip-price">¥18</div>
+                            <div class="chip-rating">⭐⭐⭐⭐</div>
+                            <p>HiFi4</p>
+                            <p>4路麦克风</p>
+                            <p>蓝牙5.3</p>
+                        </div>
+                    </div>
+                    
+                    <div class="key-point">
+                        <h3>音频处理能力</h3>
+                        <ul>
+                            <li><span class="check">WQ7036A</span>: ⭐⭐⭐⭐⭐ (HiFi5+NPU)</li>
+                            <li><span class="check">BES2500Z</span>: ⭐⭐⭐⭐ (DSP)</li>
+                            <li><span class="check">WQ7026A</span>: ⭐⭐⭐⭐ (HiFi4)</li>
+                            <li>BES2300HC: ⭐⭐⭐ (DSP)</li>
+                            <li>QCC3020: ⭐⭐⭐ (DSP)</li>
+                            <li><span class="cross">JL7006F</span>: ⭐ (无DSP)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="key-point">
+                        <h3>降噪能力</h3>
+                        <ul>
+                            <li><span class="check">WQ7036A</span>: ✅ ANC + ENC + 波束成形</li>
+                            <li><span class="check">BES2500Z</span>: ✅ ANC + ENC</li>
+                            <li><span class="check">WQ7026A</span>: ✅ ANC + ENC</li>
+                            <li><span class="check">BES2300HC</span>: ✅ ANC</li>
+                            <li><span class="check">QCC3020</span>: ✅ ANC</li>
+                            <li><span class="cross">JL7006F</span>: ❌ 无降噪</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 幻灯片 5: 成本分析对比 -->
+            <div class="slide">
+                <div class="slide-number">5</div>
+                <div class="slide-title">成本分析对比</div>
+                <div class="slide-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>芯片方案</th>
+                                <th>芯片成本</th>
+                                <th>硬件BOM</th>
+                                <th>总成本</th>
+                                <th>200元可行性</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>WQ7036A</strong></td>
+                                <td>¥50</td>
+                                <td>¥168</td>
+                                <td>¥216</td>
+                                <td><span class="warning">⚠️ 接近上限</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>WQ7026A</strong></td>
+                                <td>¥36</td>
+                                <td>¥154</td>
+                                <td>¥202</td>
+                                <td><span class="check">✅ 勉强达标</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>BES2300HC</strong></td>
+                                <td>¥32</td>
+                                <td>¥150</td>
+                                <td>¥198</td>
+                                <td><span class="check">✅ 可行</span></td>
+                            </tr>
+                            <tr>
+                                <td>JL7006F</td>
+                                <td>¥16</td>
+                                <td>¥134</td>
+                                <td>¥182</td>
+                                <td><span class="check">✅ 但功能不足</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="key-point">
+                        <h3>成本构成分析</h3>
+                        <ul>
+                            <li><strong>硬件BOM (¥150-170)</strong>
+                                <ul>
+                                    <li>芯片 (15-20%)</li>
+                                    <li>麦克风 (10-12%)</li>
+                                    <li>电池 (8-10%)</li>
+                                    <li>外壳 (15-20%)</li>
+                                    <li>PCB (8-10%)</li>
+                                    <li>其他 (30-35%)</li>
+                                </ul>
+                            </li>
+                            <li><strong>其他成本 (¥40-50)</strong>
+                                <ul>
+                                    <li>组装测试 (8%)</li>
+                                    <li>认证费用</li>
+                                    <li>研发分摊</li>
+                                    <li>包装</li>
+                                </ul>
+                            </li>
+                        </

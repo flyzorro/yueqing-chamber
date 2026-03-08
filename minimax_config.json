@@ -1,0 +1,28 @@
+{
+  "model": {
+    "providers": {
+      "minimax": {
+        "apiKey": "sk-cp-G1NfwXCdxhUzNUIf3rKOi6ASpoWuIA20y4BCfIFzh_z-dHfhKa1EyjSia-7uGxPW6bixT9_Lm6VGeENJJfgaSBu79TabIfRX2fZ8jRgY80jERMuAPoFSRr4",
+        "baseURL": "https://api.minimax.chat/v1",
+        "models": {
+          "m2.5-cn": {
+            "id": "m2.5-cn",
+            "contextWindow": 128000,
+            "maxOutputTokens": 8192,
+            "supportsImages": false,
+            "supportsAudio": false,
+            "supportsVideo": false,
+            "supportsTools": true,
+            "supportsJson": true,
+            "supportsReasoning": false,
+            "defaultTemperature": 0.7,
+            "defaultTopP": 0.95,
+            "defaultFrequencyPenalty": 0,
+            "defaultPresencePenalty": 0
+          }
+        }
+      }
+    },
+    "default": "minimax/m2.5-cn"
+  }
+}
