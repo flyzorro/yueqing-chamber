@@ -1,18 +1,5 @@
 import prisma from '../lib/prisma';
 
-export interface Activity {
-  id: string;
-  title: string;
-  description: string;
-  date: Date;
-  location: string;
-  maxParticipants: number;
-  currentParticipants: number;
-  status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 export interface CreateActivityRequest {
   title: string;
   description: string;
@@ -34,7 +21,7 @@ export interface UpdateActivityRequest {
 
 export class ActivityStore {
   // 获取所有活动
-  async getAll(): Promise<Activity[]> {
+  async getAll() {
     const activities = await prisma.activity.findMany({
       orderBy: { date: 'asc' }
     });
@@ -42,12 +29,7 @@ export class ActivityStore {
   }
 
   // 分页获取活动
-  async getPaginated(page: number = 1, limit: number = 10): Promise<{
-    data: Activity[];
-    total: number;
-    page: number;
-    limit: number;
-  }> {
+  async getPaginated(page: number = 1, limit: number = 10) {
     const skip = (page - 1) * limit;
     
     const [data, total] = await Promise.all([
@@ -63,7 +45,7 @@ export class ActivityStore {
   }
 
   // 根据 ID 获取活动
-  async getById(id: string): Promise<Activity | null> {
+  async getById(id: string) {
     const activity = await prisma.activity.findUnique({
       where: { id }
     });
@@ -71,7 +53,7 @@ export class ActivityStore {
   }
 
   // 创建活动
-  async create(request: CreateActivityRequest): Promise<Activity> {
+  async create(request: CreateActivityRequest) {
     const activity = await prisma.activity.create({
       data: {
         title: request.title,
@@ -86,7 +68,7 @@ export class ActivityStore {
   }
 
   // 更新活动
-  async update(id: string, request: UpdateActivityRequest): Promise<Activity | null> {
+  async update(id: string, request: UpdateActivityRequest) {
     const data: any = { ...request };
     if (request.date) {
       data.date = new Date(request.date);
@@ -100,7 +82,7 @@ export class ActivityStore {
   }
 
   // 删除活动
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string) {
     await prisma.activity.delete({
       where: { id }
     });
@@ -108,7 +90,7 @@ export class ActivityStore {
   }
 
   // 报名活动
-  async register(id: string): Promise<{ success: boolean; error?: string }> {
+  async register(id: string) {
     const activity = await this.getById(id);
     
     if (!activity) {
