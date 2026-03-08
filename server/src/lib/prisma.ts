@@ -1,13 +1,13 @@
-// Prisma 7 使用默认导入
-import { PrismaClient } from '@prisma/client';
+// Prisma 7 使用 namespace 导入
+import * as Prisma from '@prisma/client';
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
+  prisma: Prisma.PrismaClient | undefined;
 };
 
 export const prisma =
   globalForPrisma.prisma ??
-  new PrismaClient({
+  new Prisma.PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   });
 
