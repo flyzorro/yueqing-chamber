@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, RefreshControl, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { API } from './utils/api';
 
 interface Activity {
   id: string;
@@ -22,7 +23,7 @@ export default function ActivitiesScreen() {
 
   const fetchActivities = async (pageNum: number, refresh = false) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/activities?page=${pageNum}&limit=10`);
+      const response = await fetch(`${API.ACTIVITIES}?page=${pageNum}&limit=10`);
       const json = await response.json();
       
       if (json.success) {
@@ -44,7 +45,7 @@ export default function ActivitiesScreen() {
 
   const register = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/activities/${id}/register`, { method: 'POST' });
+      const response = await fetch(`${API.ACTIVITIES}/${id}/register`, { method: 'POST' });
       const json = await response.json();
       
       if (json.success) {

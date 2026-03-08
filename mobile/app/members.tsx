@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, RefreshControl, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { API } from './utils/api';
 
 interface Member {
   id: string;
@@ -19,7 +20,7 @@ export default function MembersScreen() {
 
   const fetchMembers = async (pageNum: number, refresh = false) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/members?page=${pageNum}&limit=10`);
+      const response = await fetch(`${API.MEMBERS}?page=${pageNum}&limit=10`);
       const json = await response.json();
       
       if (json.success) {

@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityInd
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fetchApi } from './utils/api';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -40,28 +41,21 @@ export default function LoginScreen() {
         body.name = name;
       }
 
-      const response = await fetch(`http://localhost:3000/api/auth/${endpoint}`, {
+      const json = await fetchApi(`/api/auth/${endpoint}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
 
-      const json = await response.json();
+      // 保存 Token
+      await AsyncStorage.setItem('token', json.data.token);
+      await AsyncStorage.setItem('user', JSON.stringify(json.data.user));
 
-      if (json.success) {
-        // 保存 Token
-        await AsyncStorage.setItem('token', json.data.token);
-        await AsyncStorage.setItem('user', JSON.stringify(json.data.user));
-
-        Alert.alert('成功', isRegister ? '注册成功' : '登录成功', [
-          { text: '确定', onPress: () => router.replace('/') }
-        ]);
-      } else {
-        Alert.alert('错误', json.error || '操作失败');
-      }
+      Alert.alert('成功', isRegister ? '注册成功' : '登录成功', [
+        { text: '确定', onPress: () => router.replace('/') }
+      ]);
     } catch (error) {
       console.error('Auth error:', error);
-      Alert.alert('错误', '网络错误，请稍后重试');
+      Alert.alert('错误', error instanceof Error ? error.message : '网络错误，请稍后重试');
     } finally {
       setLoading(false);
     }
