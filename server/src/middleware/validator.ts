@@ -84,3 +84,53 @@ export const validateActivityCreate = (req: Request, res: Response, next: NextFu
 
   next();
 };
+
+// 活动更新验证中间件
+export const validateActivityUpdate = (req: Request, res: Response, next: NextFunction): void => {
+  const { date, maxParticipants } = req.body;
+
+  // 日期格式（如果提供）
+  if (date && isNaN(Date.parse(date))) {
+    res.status(400).json({
+      success: false,
+      error: '日期格式不正确'
+    });
+    return;
+  }
+
+  // 最大参与人数
+  if (maxParticipants !== undefined && maxParticipants < 1) {
+    res.status(400).json({
+      success: false,
+      error: '最大参与人数必须大于0'
+    });
+    return;
+  }
+
+  next();
+};
+
+// 会员更新验证中间件
+export const validateMemberUpdate = (req: Request, res: Response, next: NextFunction): void => {
+  const { phone, email } = req.body;
+
+  // 手机号格式（如果提供）
+  if (phone && !validatePhone(phone)) {
+    res.status(400).json({
+      success: false,
+      error: '手机号格式不正确'
+    });
+    return;
+  }
+
+  // 邮箱格式
+  if (email && !validateEmail(email)) {
+    res.status(400).json({
+      success: false,
+      error: '邮箱格式不正确'
+    });
+    return;
+  }
+
+  next();
+};
