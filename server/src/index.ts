@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 import routes from './routes';
 import swaggerDocument from './swagger.json';
+import path from 'path';
 
 dotenv.config();
 
@@ -17,6 +18,15 @@ if (!process.env.JWT_SECRET) {
 // 中间件
 app.use(cors());
 app.use(express.json());
+
+// 静态文件服务 (dashboard)
+const dashboardPath = path.join(__dirname, '../../dashboard');
+app.use(express.static(dashboardPath));
+
+// 根路径返回 dashboard
+app.get('/', (req, res) => {
+  res.sendFile(path.join(dashboardPath, 'index.html'));
+});
 
 // Swagger API 文档
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
