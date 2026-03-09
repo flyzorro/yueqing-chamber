@@ -20,7 +20,8 @@ jobs:
             exit 1
           fi
           if ! echo "$PR_BODY" | grep -qE '!\[.*\]\(.*\)|<img.*src=.*'; then
-            echo "::warning::No screenshots detected in PR description. If this PR contains UI changes, please add screenshots."
+            echo "::error::PR must include screenshots in description!"
+            exit 1
           else
             echo "✓ Screenshots found in PR description"
           fi
