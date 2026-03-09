@@ -8,42 +8,42 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  phone     String   @unique
-  password  String
-  name      String
-  avatar    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String    @id @default(cuid()) @db.VarChar
+  phone     String    @unique @db.VarChar
+  password  String    @db.VarChar
+  name      String    @db.VarChar
+  avatar    String?   @db.VarChar
+  createdat DateTime? @default(now()) @db.Timestamp(6)
+  updatedat DateTime? @default(now()) @db.Timestamp(6)
 }
 
 model Member {
-  id         String   @id @default(cuid())
-  name       String
-  phone      String
-  email      String?
-  company    String
-  position   String?
-  joinDate   DateTime @default(now())
-  status     String   @default("active")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String    @id @default(cuid()) @db.VarChar
+  name      String    @db.VarChar
+  phone     String    @db.VarChar
+  email     String?   @db.VarChar
+  company   String    @db.VarChar
+  position  String?   @db.VarChar
+  joindate  DateTime? @default(now()) @db.Timestamp(6)
+  status    String?   @default("active") @db.VarChar
+  createdat DateTime? @default(now()) @db.Timestamp(6)
+  updatedat DateTime? @default(now()) @db.Timestamp(6)
 
   @@index([phone])
   @@index([status])
 }
 
 model Activity {
-  id                  String   @id @default(cuid())
-  title               String
-  description         String
-  date                DateTime
-  location            String
-  maxParticipants     Int
-  currentParticipants Int      @default(0)
-  status              String   @default("upcoming")
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  id                  String    @id @default(cuid()) @db.VarChar
+  title               String    @db.VarChar
+  description         String?
+  date                DateTime  @db.Timestamp(6)
+  location            String    @db.VarChar
+  maxparticipants     Int
+  currentparticipants Int?      @default(0)
+  status              String?   @default("upcoming") @db.VarChar
+  createdat           DateTime? @default(now()) @db.Timestamp(6)
+  updatedat           DateTime? @default(now()) @db.Timestamp(6)
 
   @@index([date])
   @@index([status])

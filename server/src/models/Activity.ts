@@ -60,7 +60,7 @@ export class ActivityStore {
         description: request.description,
         date: new Date(request.date),
         location: request.location,
-        maxParticipants: request.maxParticipants,
+        maxparticipants: request.maxParticipants,
         status: request.status || 'upcoming'
       }
     });
@@ -69,10 +69,14 @@ export class ActivityStore {
 
   // 更新活动
   async update(id: string, request: UpdateActivityRequest) {
-    const data: any = { ...request };
-    if (request.date) {
-      data.date = new Date(request.date);
-    }
+    const data: any = {};
+    if (request.title) data.title = request.title;
+    if (request.description !== undefined) data.description = request.description;
+    if (request.date) data.date = new Date(request.date);
+    if (request.location) data.location = request.location;
+    if (request.maxParticipants !== undefined) data.maxparticipants = request.maxParticipants;
+    if (request.currentParticipants !== undefined) data.currentparticipants = request.currentParticipants;
+    if (request.status) data.status = request.status;
     
     const activity = await prisma.activity.update({
       where: { id },
@@ -97,14 +101,15 @@ export class ActivityStore {
       return { success: false, error: '活动不存在' };
     }
 
-    if (activity.currentParticipants >= activity.maxParticipants) {
+    const current = activity.currentparticipants || 0;
+    if (current >= activity.maxparticipants) {
       return { success: false, error: '报名人数已满' };
     }
 
     await prisma.activity.update({
       where: { id },
       data: {
-        currentParticipants: activity.currentParticipants + 1
+        currentparticipants: current + 1
       }
     });
 

@@ -74,8 +74,8 @@ export class UserStore {
         phone: true,
         name: true,
         avatar: true,
-        createdAt: true,
-        updatedAt: true
+        createdat: true,
+        updatedat: true
       }
     });
     return users;

@@ -46,9 +46,9 @@ export default function LoginScreen() {
         body: JSON.stringify(body)
       });
 
-      // 保存 Token
-      await AsyncStorage.setItem('token', json.data.token);
-      await AsyncStorage.setItem('user', JSON.stringify(json.data.user));
+      // 保存 Token 和用户信息（使用与 auth.ts 一致的 key）
+      await AsyncStorage.setItem('yueqing_chamber_token', json.data.token);
+      await AsyncStorage.setItem('yueqing_chamber_user', JSON.stringify(json.data.user));
 
       Alert.alert('成功', isRegister ? '注册成功' : '登录成功', [
         { text: '确定', onPress: () => router.replace('/') }

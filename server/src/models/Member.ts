@@ -22,7 +22,7 @@ export class MemberStore {
   // 获取所有会员
   async getAll() {
     const members = await prisma.member.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdat: 'desc' }
     });
     return members;
   }
@@ -35,7 +35,7 @@ export class MemberStore {
       prisma.member.findMany({
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdat: 'desc' }
       }),
       prisma.member.count()
     ]);
