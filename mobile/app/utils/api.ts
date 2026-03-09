@@ -23,7 +23,7 @@ export const API = {
 
 // 请求配置 - 支持相对路径和完整 URL
 export const fetchApi = async (url: string, options: RequestInit = {}) => {
-  const token = await AsyncStorage.getItem('token');
+  const token = await AsyncStorage.getItem('yueqing_chamber_token');
   
   // 如果是相对路径，添加 base URL
   const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
