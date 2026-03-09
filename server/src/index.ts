@@ -20,8 +20,9 @@ app.use(cors());
 app.use(express.json());
 
 // 静态文件服务 (dashboard)
-const dashboardPath = path.join(__dirname, '../../dashboard');
-app.use(express.static(dashboardPath));
+// 使用 process.cwd() 确保在 Railway/Vercel 等环境中正确找到 dashboard
+const dashboardPath = path.join(process.cwd(), 'dashboard');
+app.use('/dashboard', express.static(dashboardPath));
 
 // 根路径返回 dashboard
 app.get('/', (req, res) => {
