@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { getUser, clearAuthData, User } from '../utils/auth';
+import { getUser, clearAuthData, User } from './utils/auth';
 
 export default function ProfileScreen() {
   const router = useRouter();
