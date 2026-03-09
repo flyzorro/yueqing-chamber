@@ -1,6 +1,7 @@
 import js from '@eslint/js';
 import ts from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
+import globals from 'globals';
 
 export default [
   js.configs.recommended,
@@ -14,12 +15,9 @@ export default [
         project: './tsconfig.json',
       },
       globals: {
-        process: 'readonly',
-        console: 'readonly',
-        __dirname: 'readonly',
-        module: 'readonly',
-        require: 'readonly',
-        exports: 'writable',
+        ...globals.node,
+        ...globals.jest,
+        ...globals.es2020,
       },
     },
     plugins: {
@@ -30,6 +28,7 @@ export default [
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-namespace': 'off',
       'no-console': 'warn',
     },
   },
