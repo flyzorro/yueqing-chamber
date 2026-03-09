@@ -2,12 +2,12 @@
 
 ## 团队结构
 
-| 角色 | Agent ID | 职责 | 工作分支 | tmux 会话 |
-|------|----------|------|----------|-----------|
-| 🧭 指挥官 | `zoe` | 业务理解、任务拆解、质量把控 | `main` | `zoe` |
-| 🔧 研发 | `dev-agent` | 功能开发、Code Review、技术决策 | `feature/*` | `dev` |
-| 🧪 测试 | `qa-agent` | 单元测试、E2E 测试、Bug 报告 | `test/*` | `qa` |
-| 📦 部署 | `deploy-agent` | CI/CD、监控、日志 | `deploy/*` | `deploy` |
+| 角色 | 名字 | Agent ID | 职责 | 工作分支 | tmux 会话 |
+|------|------|----------|------|----------|-----------|
+| 🧭 指挥官 | **Zoe** | `zoe` | 业务理解、任务拆解、质量把控 | `main` | `zoe` |
+| 🔧 研发 | **谢伟** | `dev-agent` | 功能开发、Code Review、技术决策 | `feature/*` | `dev` |
+| 🧪 测试 | **勇军** | `qa-agent` | 单元测试、E2E 测试、Bug 报告 | `test/*` | `qa` |
+| 📦 部署 | **艳芳** | `deploy-agent` | CI/CD、监控、日志 | `deploy/*` | `deploy` |
 
 ---
 
