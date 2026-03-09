@@ -171,7 +171,7 @@ router.get('/me', authenticate, async (req: Request, res: Response) => {
       return;
     }
 
-    const { password, ...userWithoutPassword } = user;
+    const { password: _password, ...userWithoutPassword } = user;
     
     res.json({
       success: true,
