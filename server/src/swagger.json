@@ -141,6 +141,95 @@
         }
       }
     },
+    "/api/members/{id}/details": {
+      "get": {
+        "tags": ["会员管理"],
+        "summary": "获取会员详情",
+        "description": "返回会员完整信息、最近活动和报名记录",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "会员ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功返回会员详情",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "name": { "type": "string" },
+                        "phone": { "type": "string" },
+                        "email": { "type": "string", "nullable": true },
+                        "company": { "type": "string" },
+                        "position": { "type": "string", "nullable": true },
+                        "joindate": { "type": "string", "format": "date-time", "nullable": true },
+                        "status": { "type": "string" },
+                        "recentActivities": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": { "type": "string" },
+                              "activityId": { "type": "string" },
+                              "activityTitle": { "type": "string" },
+                              "activityDate": { "type": "string", "format": "date-time" },
+                              "activityLocation": { "type": "string" },
+                              "status": { "type": "string" },
+                              "registeredAt": { "type": "string", "format": "date-time" }
+                            }
+                          }
+                        },
+                        "registrationCount": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "会员不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "error": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "error": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/activities": {
       "get": {
         "tags": ["活动管理"],

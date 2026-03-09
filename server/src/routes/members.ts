@@ -134,4 +134,33 @@ router.delete('/:id', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * GET /api/members/:id/details
+ * 获取会员详情（包含最近活动和报名记录）
+ */
+router.get('/:id/details', async (req: Request, res: Response) => {
+  try {
+    const details = await memberStore.getDetails(req.params.id);
+    
+    if (!details) {
+      res.status(404).json({ 
+        success: false, 
+        error: '会员不存在' 
+      });
+      return;
+    }
+
+    res.json({
+      success: true,
+      data: details
+    });
+  } catch (error) {
+    console.error('Get member details error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: '获取会员详情失败' 
+    });
+  }
+});
+
 export default router;

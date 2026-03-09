@@ -18,6 +18,31 @@ export interface UpdateMemberRequest {
   status?: 'active' | 'inactive';
 }
 
+export interface MemberDetails {
+  id: string;
+  name: string;
+  phone: string;
+  email: string | null;
+  company: string;
+  position: string | null;
+  joindate: Date | null;
+  status: string | null;
+  createdat: Date | null;
+  updatedat: Date | null;
+  recentActivities: ActivityRegistration[];
+  registrationCount: number;
+}
+
+export interface ActivityRegistration {
+  id: string;
+  activityId: string;
+  activityTitle: string;
+  activityDate: Date;
+  activityLocation: string;
+  status: string | null;
+  registeredAt: Date | null;
+}
+
 export class MemberStore {
   // 获取所有会员
   async getAll() {
@@ -49,6 +74,48 @@ export class MemberStore {
       where: { id }
     });
     return member;
+  }
+
+  // 获取会员详情（包含最近活动和报名记录）
+  async getDetails(id: string): Promise<MemberDetails | null> {
+    const member = await prisma.member.findUnique({
+      where: { id },
+      include: {
+        registrations: {
+          include: {
+            activity: true
+          },
+          orderBy: {
+            createdat: 'desc'
+          },
+          take: 10
+        }
+      }
+    });
+
+    if (!member) {
+      return null;
+    }
+
+    const recentActivities: ActivityRegistration[] = member.registrations.map(reg => ({
+      id: reg.id,
+      activityId: reg.activityId,
+      activityTitle: reg.activity.title,
+      activityDate: reg.activity.date,
+      activityLocation: reg.activity.location,
+      status: reg.status,
+      registeredAt: reg.createdat
+    }));
+
+    const registrationCount = await prisma.registration.count({
+      where: { memberId: id }
+    });
+
+    return {
+      ...member,
+      recentActivities,
+      registrationCount
+    };
   }
 
   // 创建会员
