@@ -103,6 +103,22 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     needs: [server, mobile]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: yueqing_chamber_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d yueqing_chamber_test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/yueqing_chamber_test?schema=public
 
     steps:
       - uses: actions/checkout@v4
@@ -113,6 +129,10 @@ jobs:
       - name: Install server dependencies
         working-directory: server
         run: npm install
+
+      - name: Push Prisma schema to test database
+        working-directory: server
+        run: npx prisma db push
 
       - name: Install Playwright
         run: npx playwright install --with-deps chromium
