@@ -208,6 +208,44 @@ describe('Members API', () => {
       expect(response.body.data).toHaveLength(2);
       expect(response.body.pagination.total).toBe(2);
     });
+
+    it('should support keyword and status filters', async () => {
+      const mockMembers = [{ id: '1', name: '张恺毅', company: '月清科技', status: 'active' }];
+
+      (prisma.member.findMany as jest.Mock).mockResolvedValue(mockMembers);
+      (prisma.member.count as jest.Mock).mockResolvedValue(1);
+
+      const response = await request(app).get(
+        '/api/members?page=1&limit=10&keyword=张&status=active'
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.filters).toEqual({ keyword: '张', status: 'active' });
+      expect(prisma.member.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            status: 'active',
+            OR: expect.any(Array),
+          }),
+        })
+      );
+    });
+
+    it('should fall back to fixture members when prisma table is missing', async () => {
+      const prismaError = new Error('The table public.Member does not exist') as Error & { code?: string };
+      prismaError.code = 'P2021';
+
+      (prisma.member.findMany as jest.Mock).mockRejectedValue(prismaError);
+      (prisma.member.count as jest.Mock).mockRejectedValue(prismaError);
+
+      const response = await request(app).get('/api/members?page=1&limit=10&keyword=张&status=active');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.length).toBeGreaterThan(0);
+      expect(response.body.data[0].name).toContain('张');
+      expect(response.body.filters).toEqual({ keyword: '张', status: 'active' });
+    });
   });
 
   describe('GET /api/members/:id', () => {
