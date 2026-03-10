@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import prisma from '../lib/prisma';
 
 export interface CreateMemberRequest {
@@ -18,26 +19,65 @@ export interface UpdateMemberRequest {
   status?: 'active' | 'inactive';
 }
 
+export interface MemberListFilters {
+  page?: number;
+  limit?: number;
+  keyword?: string;
+  status?: 'active' | 'inactive';
+}
+
 export class MemberStore {
+  private buildWhere(filters: MemberListFilters): Prisma.MemberWhereInput {
+    const where: Prisma.MemberWhereInput = {};
+    const keyword = filters.keyword?.trim();
+
+    if (filters.status) {
+      where.status = filters.status;
+    }
+
+    if (keyword) {
+      where.OR = [
+        {
+          name: {
+            contains: keyword,
+            mode: 'insensitive',
+          },
+        },
+        {
+          company: {
+            contains: keyword,
+            mode: 'insensitive',
+          },
+        },
+      ];
+    }
+
+    return where;
+  }
+
   // 获取所有会员
   async getAll() {
     const members = await prisma.member.findMany({
-      orderBy: { createdat: 'desc' }
+      orderBy: { createdat: 'desc' },
     });
     return members;
   }
 
   // 分页获取会员
-  async getPaginated(page: number = 1, limit: number = 10) {
+  async getPaginated(filters: MemberListFilters = {}) {
+    const page = Math.max(filters.page || 1, 1);
+    const limit = Math.max(filters.limit || 10, 1);
     const skip = (page - 1) * limit;
-    
+    const where = this.buildWhere(filters);
+
     const [data, total] = await Promise.all([
       prisma.member.findMany({
+        where,
         skip,
         take: limit,
-        orderBy: { createdat: 'desc' }
+        orderBy: { createdat: 'desc' },
       }),
-      prisma.member.count()
+      prisma.member.count({ where }),
     ]);
 
     return { data, total, page, limit };
@@ -46,7 +86,7 @@ export class MemberStore {
   // 根据 ID 获取会员
   async getById(id: string) {
     const member = await prisma.member.findUnique({
-      where: { id }
+      where: { id },
     });
     return member;
   }
@@ -60,8 +100,8 @@ export class MemberStore {
         email: request.email,
         company: request.company,
         position: request.position,
-        status: request.status || 'active'
-      }
+        status: request.status || 'active',
+      },
     });
     return member;
   }
@@ -70,7 +110,7 @@ export class MemberStore {
   async update(id: string, request: UpdateMemberRequest) {
     const member = await prisma.member.update({
       where: { id },
-      data: request
+      data: request,
     });
     return member;
   }
@@ -78,7 +118,7 @@ export class MemberStore {
   // 删除会员
   async delete(id: string) {
     await prisma.member.delete({
-      where: { id }
+      where: { id },
     });
     return true;
   }
