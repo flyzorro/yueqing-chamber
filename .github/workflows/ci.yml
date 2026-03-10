@@ -9,9 +9,32 @@ on:
 jobs:
   check-pr-screenshots:
     runs-on: ubuntu-latest
+    outputs:
+      has_ui_changes: ${{ steps.detect.outputs.has_ui_changes }}
     steps:
-      - name: Check for screenshots in PR description
+      - uses: actions/checkout@v4
         if: github.event_name == 'pull_request'
+        with:
+          fetch-depth: 0
+
+      - name: Detect UI changes
+        id: detect
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          CHANGED_FILES=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          echo "$CHANGED_FILES"
+
+          if echo "$CHANGED_FILES" | grep -Eq '^(mobile/|web/|app/)|\.(tsx|jsx|css|scss|sass|less)$'; then
+            echo "has_ui_changes=true" >> "$GITHUB_OUTPUT"
+            echo "UI changes detected"
+          else
+            echo "has_ui_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No UI changes detected; screenshot check will be skipped"
+          fi
+
+      - name: Check for screenshots in PR description
+        if: github.event_name == 'pull_request' && steps.detect.outputs.has_ui_changes == 'true'
         env:
           PR_BODY: "${{ github.event.pull_request.body }}"
         run: |
@@ -20,11 +43,15 @@ jobs:
             exit 1
           fi
           if ! echo "$PR_BODY" | grep -qE '!\[.*\]\(.*\)|<img.*src=.*'; then
-            echo "::error::PR must include screenshots in description!"
+            echo "::error::PR must include screenshots in description for UI changes!"
             exit 1
           else
             echo "✓ Screenshots found in PR description"
           fi
+
+      - name: Skip screenshot check for non-UI PRs
+        if: github.event_name == 'pull_request' && steps.detect.outputs.has_ui_changes != 'true'
+        run: echo "No UI changes; screenshot requirement skipped"
 
   server:
     runs-on: ubuntu-latest
@@ -76,6 +103,22 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     needs: [server, mobile]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: yueqing_chamber_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d yueqing_chamber_test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/yueqing_chamber_test?schema=public
 
     steps:
       - uses: actions/checkout@v4
@@ -86,6 +129,10 @@ jobs:
       - name: Install server dependencies
         working-directory: server
         run: npm install
+
+      - name: Push Prisma schema to test database
+        working-directory: server
+        run: npx prisma db push
 
       - name: Install Playwright
         run: npx playwright install --with-deps chromium
