@@ -42,6 +42,15 @@ export default function RootLayout() {
           }}
         />
         <Tabs.Screen
+          name="companies"
+          options={{
+            title: '企业名单',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="business" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="activities"
           options={{
             title: '活动管理',
