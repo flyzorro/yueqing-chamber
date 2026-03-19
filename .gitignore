@@ -18,3 +18,7 @@ build/
 # Testing
 coverage/
 playwright-report/node_modules/
+
+# Local package manager cache
+.npm-cache/
+mobile/.npm-cache/

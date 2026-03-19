@@ -1,8 +1,15 @@
 import { Tabs } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import { useFonts } from 'expo-font';
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts(Ionicons.font);
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
     <>
       <StatusBar style="auto" />
@@ -38,6 +45,15 @@ export default function RootLayout() {
             title: '会员中心',
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="people" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="companies"
+          options={{
+            title: '企业名单',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="business" size={size} color={color} />
             ),
           }}
         />

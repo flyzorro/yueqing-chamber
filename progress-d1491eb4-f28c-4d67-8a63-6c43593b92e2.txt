@@ -1,0 +1,44 @@
+# Progress Log
+Run: d1491eb4-f28c-4d67-8a63-6c43593b92e2
+Task: Develop Package A from docs/requirement-gap-analysis.md for repo /Users/zky/code/worktrees/yueqing-main-dev.
+Started: 2026-03-19 15:30 Asia/Shanghai
+
+## Codebase Patterns
+- Server list endpoints use dedicated store classes under `server/src/models`, and route handlers under `server/src/routes` are kept thin.
+- Non-production list endpoints can fall back to fixture data when Prisma is unavailable or a table is missing (`P2021`), which keeps tests and local work unblocked.
+- Backend tests use Jest + Supertest with `../lib/prisma` mocked directly inside each route/store test file.
+- Route registration for API modules is centralized in `server/src/routes/index.ts`.
+- The Expo Router mobile app keeps tab registration in `mobile/app/_layout.tsx`, while `mobile/app/index.tsx` is the home shortcut hub for top-level modules.
+- Mobile validation currently uses `cd mobile && npm test` for lightweight source-oriented Jest checks and `cd mobile && npm run typecheck` for TypeScript verification.
+- When Expo tabs use `@expo/vector-icons`, preload the icon font in `mobile/app/_layout.tsx` with `useFonts(Ionicons.font)` to avoid missing/garbled tab icons during web rendering.
+- The current mobile regression tests are source-level Jest assertions under `mobile/app/__tests__`, which makes top-level navigation semantics cheap to verify without full native rendering.
+
+---
+
+## 2026-03-19 15:44 Asia/Shanghai - US-001: Add minimal company directory data model and list API
+- Added a dedicated Prisma `Company` model separate from `Member`, with only minimal list-oriented fields: name, industry, contact name/phone, summary, status, and sort order.
+- Added a fixture-backed `CompanyStore` with paginated list retrieval, keyword/status filtering, stable sort order, and the same Prisma fallback behavior used by members.
+- Added a dedicated `/api/companies` Express route and registered it in the API router without changing existing members/activity/auth behavior.
+- Added backend tests for the companies route/store, including Prisma success cases, filter wiring, fallback behavior, and error handling.
+- Confirmed existing members API tests still pass unchanged.
+- Files changed: `server/prisma/schema.prisma`, `server/src/routes/index.ts`, `server/src/models/Company.ts`, `server/src/routes/companies.ts`, `server/src/data/companyFixture.ts`, `server/src/__tests__/companies.test.ts`
+- **Learnings:** The cleanest way to extend this backend is to mirror the members module pattern rather than generalize prematurely; thin routes + store logic + fixture fallback is the established backend shape here.
+---
+
+## 2026-03-19 15:49 Asia/Shanghai - US-002: Build an independent company directory list screen
+- Added a dedicated Expo Router screen at `mobile/app/companies.tsx` with company-directory-specific title/copy, loading/empty/error states, pull-to-refresh, and basic list cards for company name, industry, contact, and summary.
+- Wired the screen to the dedicated `API.COMPANIES` endpoint instead of the members endpoint, keeping company directory semantics separate from 会员中心 and avoiding any company detail navigation.
+- Added a distinct 企业名单 tab entry in `mobile/app/_layout.tsx` and a separate home shortcut in `mobile/app/index.tsx` so users can enter the module directly.
+- Fixed the failed visual verification by preloading `Ionicons.font` in the root tab layout so bottom-tab icons render correctly on web instead of appearing as garbled glyphs.
+- Added lightweight mobile tests covering the dedicated route/API/navigation semantics plus the icon-font preload regression.
+- Files changed: `mobile/app/companies.tsx`, `mobile/app/_layout.tsx`, `mobile/app/index.tsx`, `mobile/app/utils/api.ts`, `mobile/app/__tests__/companies.test.js`, `mobile/package.json`, `mobile/package-lock.json`, `.gitignore`
+- **Learnings:** This mobile app exposes top-level modules through both the tab layout and the home shortcut grid, so truly independent modules should usually be added in both places to keep navigation semantics clear.
+---
+
+## 2026-03-19 15:56 Asia/Shanghai - US-003: Add distinct navigation entry and preserve module separation
+- Tightened the homepage shortcut copy so the existing 会员中心 entry stays explicitly member-focused while 企业名单 remains a separate independent company-directory entry.
+- Expanded the mobile regression suite to assert the dedicated companies screen uses `API.COMPANIES` rather than member APIs, that the tab layout keeps members and companies as separate entries, and that the original activity/service shortcuts remain intact alongside the new company entry.
+- Re-ran mobile tests and typecheck plus the required server build/test checks to confirm the navigation separation work does not break existing member/activity/service functionality.
+- Files changed: `mobile/app/index.tsx`, `mobile/app/__tests__/companies.test.js`, `progress-d1491eb4-f28c-4d67-8a63-6c43593b92e2.txt`
+- **Learnings:** For this app, source-level Jest assertions are enough to lock down top-level navigation semantics, labels, and route targets without needing heavier rendered navigation tests.
+---
