@@ -45,13 +45,13 @@ export default function HomeScreen() {
             <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/members')}>
               <Ionicons name="people" size={36} color="#007AFF" />
               <Text style={styles.menuText}>会员中心</Text>
-              <Text style={styles.menuDesc}>会员名录管理</Text>
+              <Text style={styles.menuDesc}>商会成员名录</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/companies')}>
               <Ionicons name="business" size={36} color="#007AFF" />
               <Text style={styles.menuText}>企业名单</Text>
-              <Text style={styles.menuDesc}>独立企业名录</Text>
+              <Text style={styles.menuDesc}>独立企业名录入口</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/activities')}>

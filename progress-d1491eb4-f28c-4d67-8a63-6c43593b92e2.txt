@@ -11,6 +11,7 @@ Started: 2026-03-19 15:30 Asia/Shanghai
 - The Expo Router mobile app keeps tab registration in `mobile/app/_layout.tsx`, while `mobile/app/index.tsx` is the home shortcut hub for top-level modules.
 - Mobile validation currently uses `cd mobile && npm test` for lightweight source-oriented Jest checks and `cd mobile && npm run typecheck` for TypeScript verification.
 - When Expo tabs use `@expo/vector-icons`, preload the icon font in `mobile/app/_layout.tsx` with `useFonts(Ionicons.font)` to avoid missing/garbled tab icons during web rendering.
+- The current mobile regression tests are source-level Jest assertions under `mobile/app/__tests__`, which makes top-level navigation semantics cheap to verify without full native rendering.
 
 ---
 
@@ -32,4 +33,12 @@ Started: 2026-03-19 15:30 Asia/Shanghai
 - Added lightweight mobile tests covering the dedicated route/API/navigation semantics plus the icon-font preload regression.
 - Files changed: `mobile/app/companies.tsx`, `mobile/app/_layout.tsx`, `mobile/app/index.tsx`, `mobile/app/utils/api.ts`, `mobile/app/__tests__/companies.test.js`, `mobile/package.json`, `mobile/package-lock.json`, `.gitignore`
 - **Learnings:** This mobile app exposes top-level modules through both the tab layout and the home shortcut grid, so truly independent modules should usually be added in both places to keep navigation semantics clear.
+---
+
+## 2026-03-19 15:56 Asia/Shanghai - US-003: Add distinct navigation entry and preserve module separation
+- Tightened the homepage shortcut copy so the existing 会员中心 entry stays explicitly member-focused while 企业名单 remains a separate independent company-directory entry.
+- Expanded the mobile regression suite to assert the dedicated companies screen uses `API.COMPANIES` rather than member APIs, that the tab layout keeps members and companies as separate entries, and that the original activity/service shortcuts remain intact alongside the new company entry.
+- Re-ran mobile tests and typecheck plus the required server build/test checks to confirm the navigation separation work does not break existing member/activity/service functionality.
+- Files changed: `mobile/app/index.tsx`, `mobile/app/__tests__/companies.test.js`, `progress-d1491eb4-f28c-4d67-8a63-6c43593b92e2.txt`
+- **Learnings:** For this app, source-level Jest assertions are enough to lock down top-level navigation semantics, labels, and route targets without needing heavier rendered navigation tests.
 ---
