@@ -23,6 +23,7 @@ describe('company directory mobile implementation', () => {
     expect(layoutSource).toContain('name="companies"');
     expect(layoutSource).toContain("title: '企业名单'");
     expect(layoutSource).toContain('name="members"');
+    expect(layoutSource).toContain('useFonts(Ionicons.font)');
   });
 
   it('adds a distinct home entry and dedicated API constant for the company directory', () => {
