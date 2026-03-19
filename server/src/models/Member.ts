@@ -140,6 +140,20 @@ export class MemberStore {
     return memberFixtureData.find((member) => member.id === id) || null;
   }
 
+  private getFixtureMemberDetails(id: string): MemberDetails | null {
+    const member = this.getFixtureMemberById(id);
+
+    if (!member) {
+      return null;
+    }
+
+    return {
+      ...member,
+      recentActivities: [],
+      registrationCount: 0,
+    };
+  }
+
   // 获取所有会员
   async getAll() {
     try {
@@ -202,44 +216,52 @@ export class MemberStore {
 
   // 获取会员详情（包含最近活动和报名记录）
   async getDetails(id: string): Promise<MemberDetails | null> {
-    const member = await prisma.member.findUnique({
-      where: { id },
-      include: {
-        registrations: {
-          include: {
-            activity: true,
+    try {
+      const member = await prisma.member.findUnique({
+        where: { id },
+        include: {
+          registrations: {
+            include: {
+              activity: true,
+            },
+            orderBy: {
+              createdat: 'desc',
+            },
+            take: 10,
           },
-          orderBy: {
-            createdat: 'desc',
-          },
-          take: 10,
         },
-      },
-    });
+      });
 
-    if (!member) {
-      return null;
+      if (!member) {
+        return null;
+      }
+
+      const recentActivities: ActivityRegistration[] = member.registrations.map((reg) => ({
+        id: reg.id,
+        activityId: reg.activityId,
+        activityTitle: reg.activity.title,
+        activityDate: reg.activity.date,
+        activityLocation: reg.activity.location,
+        status: reg.status,
+        registeredAt: reg.createdat,
+      }));
+
+      const registrationCount = await prisma.registration.count({
+        where: { memberId: id },
+      });
+
+      return {
+        ...member,
+        recentActivities,
+        registrationCount,
+      };
+    } catch (error) {
+      if (this.shouldUseFixtureFallback(error)) {
+        console.warn('[members] Prisma unavailable, using fixture data for getDetails');
+        return this.getFixtureMemberDetails(id);
+      }
+      throw error;
     }
-
-    const recentActivities: ActivityRegistration[] = member.registrations.map((reg) => ({
-      id: reg.id,
-      activityId: reg.activityId,
-      activityTitle: reg.activity.title,
-      activityDate: reg.activity.date,
-      activityLocation: reg.activity.location,
-      status: reg.status,
-      registeredAt: reg.createdat,
-    }));
-
-    const registrationCount = await prisma.registration.count({
-      where: { memberId: id },
-    });
-
-    return {
-      ...member,
-      recentActivities,
-      registrationCount,
-    };
   }
 
   // 创建会员

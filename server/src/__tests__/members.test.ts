@@ -148,6 +148,24 @@ describe('Members API', () => {
       expect(response.body.data.registrationCount).toBe(0);
     });
 
+    it('should fall back to fixture member details when prisma is unreachable', async () => {
+      const prismaError = new Error("Can't reach database server at db.example.com:5432") as Error & {
+        code?: string;
+      };
+      prismaError.code = 'P1001';
+
+      (prisma.member.findUnique as jest.Mock).mockRejectedValue(prismaError);
+
+      const response = await request(app).get('/api/members/fixture-member-001/details');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.id).toBe('fixture-member-001');
+      expect(response.body.data.name).toBe('张恺毅');
+      expect(response.body.data.recentActivities).toEqual([]);
+      expect(response.body.data.registrationCount).toBe(0);
+    });
+
     it('should limit recent activities to 10', async () => {
       const mockMember = {
         id: 'test-member-id',
@@ -439,6 +457,26 @@ describe('MemberStore', () => {
         status: 'registered',
         registeredAt: expect.any(Date),
       });
+    });
+
+    it('should fall back to fixture details when prisma is unreachable', async () => {
+      const prismaError = new Error("Can't reach database server at db.example.com:5432") as Error & {
+        code?: string;
+      };
+      prismaError.code = 'P1001';
+
+      (prisma.member.findUnique as jest.Mock).mockRejectedValue(prismaError);
+
+      const result = await store.getDetails('fixture-member-001');
+
+      expect(result).toMatchObject({
+        id: 'fixture-member-001',
+        name: '张恺毅',
+        company: '月清科技',
+        registrationCount: 0,
+      });
+      expect(result?.recentActivities).toEqual([]);
+      expect(prisma.registration.count).not.toHaveBeenCalled();
     });
   });
 });
