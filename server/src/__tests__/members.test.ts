@@ -112,7 +112,7 @@ describe('Members API', () => {
       expect(response.body.error).toBe('会员不存在');
     });
 
-    it('should return 500 on database error', async () => {
+    it('should return 500 on non-fallback database error', async () => {
       (prisma.member.findUnique as jest.Mock).mockRejectedValue(new Error('Database error'));
 
       const response = await request(app).get('/api/members/test-id/details');
@@ -120,6 +120,22 @@ describe('Members API', () => {
       expect(response.status).toBe(500);
       expect(response.body.success).toBe(false);
       expect(response.body.error).toBe('获取会员详情失败');
+    });
+
+    it('should fall back to fixture details when prisma table is missing', async () => {
+      const prismaError = new Error('The table public.Member does not exist') as Error & { code?: string };
+      prismaError.code = 'P2021';
+
+      (prisma.member.findUnique as jest.Mock).mockRejectedValue(prismaError);
+
+      const response = await request(app).get('/api/members/fixture-member-001/details');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.id).toBe('fixture-member-001');
+      expect(response.body.data.recentActivities).toEqual([]);
+      expect(response.body.data.registrationCount).toBe(0);
+      expect(prisma.registration.count).not.toHaveBeenCalled();
     });
 
     it('should handle member with no registrations', async () => {
@@ -439,6 +455,21 @@ describe('MemberStore', () => {
         status: 'registered',
         registeredAt: expect.any(Date),
       });
+    });
+
+    it('should fall back to fixture member details when prisma is unavailable', async () => {
+      const prismaError = new Error("Can't reach database server") as Error & { code?: string };
+
+      (prisma.member.findUnique as jest.Mock).mockRejectedValue(prismaError);
+
+      const result = await store.getDetails('fixture-member-001');
+
+      expect(result).toMatchObject({
+        id: 'fixture-member-001',
+        recentActivities: [],
+        registrationCount: 0,
+      });
+      expect(prisma.registration.count).not.toHaveBeenCalled();
     });
   });
 });
