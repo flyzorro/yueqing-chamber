@@ -148,6 +148,33 @@ describe('Members API', () => {
       expect(response.body.data.registrationCount).toBe(0);
     });
 
+    it('should fall back to fixture member details when prisma is unavailable', async () => {
+      (prisma.member.findUnique as jest.Mock).mockRejectedValue(
+        new Error("Can't reach database server")
+      );
+
+      const response = await request(app).get('/api/members/fixture-member-001/details');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.id).toBe('fixture-member-001');
+      expect(response.body.data.name).toBe('张恺毅');
+      expect(response.body.data.recentActivities).toEqual([]);
+      expect(response.body.data.registrationCount).toBe(0);
+    });
+
+    it('should return 404 for missing fixture member when prisma is unavailable', async () => {
+      (prisma.member.findUnique as jest.Mock).mockRejectedValue(
+        new Error("Can't reach database server")
+      );
+
+      const response = await request(app).get('/api/members/non-existent/details');
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error).toBe('会员不存在');
+    });
+
     it('should limit recent activities to 10', async () => {
       const mockMember = {
         id: 'test-member-id',
