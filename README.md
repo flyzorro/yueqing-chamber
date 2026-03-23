@@ -189,9 +189,9 @@ NODE_ENV=production
 
 ### Railway 部署
 
-1. 连接 GitHub 仓库
-2. 设置环境变量
-3. 自动部署
+1. 部署 `server/`
+2. 设置服务端环境变量（`DATABASE_URL`、`JWT_SECRET`、`NODE_ENV`、`PORT`）
+3. 在 `mobile/` 中通过 `EXPO_PUBLIC_API_BASE_URL` 指向已部署后端
 
 详细步骤见 [DEPLOY.md](DEPLOY.md)
 

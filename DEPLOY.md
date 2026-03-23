@@ -88,7 +88,16 @@ npx prisma migrate deploy
 
 ## 移动端配置
 
-更新 mobile/app/lib/api.ts 中的 API_BASE_URL 为部署后的地址。
+移动端通过 Expo 公共环境变量注入后端地址，不再在源码里手改 API 常量。
+
+```bash
+cd mobile
+cp .env.example .env
+# 设置为实际后端地址
+EXPO_PUBLIC_API_BASE_URL=https://your-api-domain.com
+```
+
+本地开发与预发环境都应通过 `EXPO_PUBLIC_API_BASE_URL` 切换，不要修改 `mobile/app/utils/api.ts`。
 
 ## 监控与维护
 
