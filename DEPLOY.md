@@ -4,6 +4,8 @@
 
 ### 方案一：Vercel (推荐 - 快速简单)
 
+> 当前 `server/` 运行时仅负责 API、`/api/docs`、`/health`，不再托管历史 `dashboard/` 静态页面。
+
 #### 1. 安装 Vercel CLI
 ```bash
 npm install -g vercel

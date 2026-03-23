@@ -82,6 +82,8 @@ yueqing-chamber/
 └── README.md                # 本文档
 ```
 
+当前 server 运行时只承载 API、Swagger 文档与健康检查；历史 `dashboard/` 目录不再由 `server/` 对外托管。
+
 ---
 
 ## 🚀 快速开始
