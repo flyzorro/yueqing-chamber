@@ -7,6 +7,8 @@ on:
         description: Live runtime base URL
         required: false
         default: https://yueqing-chamber-production.up.railway.app
+  schedule:
+    - cron: '0 1 * * *'
 
 jobs:
   live-runtime-smoke:
@@ -20,8 +22,16 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Resolve base URL
+        run: |
+          BASE_URL="${{ github.event.inputs.base_url }}"
+          if [ -z "$BASE_URL" ]; then
+            BASE_URL="https://yueqing-chamber-production.up.railway.app"
+          fi
+          echo "BASE_URL=$BASE_URL" >> "$GITHUB_ENV"
+
       - name: Run live runtime contract smoke
-        run: npm run check:live-runtime-contract -- "${{ github.event.inputs.base_url }}"
+        run: npm run check:live-runtime-contract -- "$BASE_URL"
 
       - name: Write workflow summary
         if: always()
@@ -30,6 +40,7 @@ jobs:
             echo '## Live Runtime Smoke'
             echo
             echo "- Base URL: \
-`${{ github.event.inputs.base_url }}`"
+`$BASE_URL`"
             echo "- Script: `npm run check:live-runtime-contract -- <base_url>`"
+            echo "- Trigger: `${{ github.event_name }}`"
           } >> "$GITHUB_STEP_SUMMARY"
