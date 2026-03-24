@@ -1,0 +1,35 @@
+name: Live Runtime Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Live runtime base URL
+        required: false
+        default: https://yueqing-chamber-production.up.railway.app
+
+jobs:
+  live-runtime-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run live runtime contract smoke
+        run: npm run check:live-runtime-contract -- "${{ github.event.inputs.base_url }}"
+
+      - name: Write workflow summary
+        if: always()
+        run: |
+          {
+            echo '## Live Runtime Smoke'
+            echo
+            echo "- Base URL: \
+`${{ github.event.inputs.base_url }}`"
+            echo "- Script: `npm run check:live-runtime-contract -- <base_url>`"
+          } >> "$GITHUB_STEP_SUMMARY"
