@@ -12,7 +12,14 @@ describe('Server runtime boundary', () => {
     expect(response.body.timestamp).toBeDefined();
   });
 
-  it('does not serve dashboard from root route', async () => {
+  it('keeps swagger docs available', async () => {
+    const response = await request(app).get('/api/docs');
+
+    expect(response.status).toBe(301);
+    expect(response.headers.location).toContain('/api/docs/');
+  });
+
+  it('does not serve a historical static site from root route', async () => {
     const response = await request(app).get('/');
 
     expect(response.status).toBe(404);
