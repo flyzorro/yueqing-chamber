@@ -3,12 +3,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 const services = [
-  { id: '1', title: '法律咨询', description: '专业律师团队提供法律咨询服务', icon: 'document-text' },
-  { id: '2', title: '财税服务', description: '税务筹划、财务咨询等专业服务', icon: 'cash' },
-  { id: '3', title: '融资对接', description: '银行、投资机构融资对接服务', icon: 'business' },
-  { id: '4', title: '人才招聘', description: '企业人才招聘与猎头服务', icon: 'people' },
-  { id: '5', title: '商务考察', description: '国内外商务考察与交流活动', icon: 'airplane' },
-  { id: '6', title: '培训学习', description: '企业管理、技能培训课程', icon: 'book' },
+  { id: '1', title: '法律服务', description: '专业律师团队提供法律咨询与合规支持', icon: 'document-text' },
+  { id: '2', title: '金融服务', description: '银行、授信与融资资源对接服务', icon: 'card' },
+  { id: '3', title: '财税服务', description: '税务筹划、财务咨询等专业服务', icon: 'cash' },
+  { id: '4', title: '工商服务', description: '企业注册、变更办理与经营合规支持', icon: 'briefcase' },
+  { id: '5', title: 'IT 技术', description: '数字化建设、软件系统与技术服务支持', icon: 'desktop' },
+  { id: '6', title: '政务服务', description: '政策解读、政企沟通与事项协同支持', icon: 'business' },
+  { id: '7', title: 'HR 服务', description: '招聘、组织发展与人力资源支持', icon: 'people' },
+  { id: '8', title: '产品服务', description: '产品策划、能力包装与商业化支持', icon: 'cube' },
+  { id: '9', title: '信息发布', description: '商机、供需与商会通知信息发布入口', icon: 'megaphone' },
 ];
 
 export default function ServicesScreen() {
