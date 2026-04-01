@@ -72,15 +72,6 @@ export default function RootLayout() {
           }}
         />
         <Tabs.Screen
-          name="civil-servants"
-          options={{
-            title: '公务员名单',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="flag" size={size} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
           name="activities"
           options={{
             title: '活动管理',

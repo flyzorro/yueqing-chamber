@@ -1,0 +1,21 @@
+# Progress Log
+Run: d0e9d918-23ac-4f16-a7b9-d7c608894b82
+Task: 为乐清商会项目新增“企业名单”独立模块；当前故事为 US-002 新增独立的企业名单 API 路由
+Started: 2026-03-18 18:50 Asia/Shanghai
+
+## Codebase Patterns
+- Express API routes are registered centrally in `server/src/routes/index.ts`, and each resource keeps its own dedicated router file under `server/src/routes/`.
+- List endpoints follow a shared response shape with `success`, `data`, `filters`, and `pagination`; fallback-friendly resources can also return `error` explicitly for consistency.
+- Data access logic lives in store classes under `server/src/models/`, with non-production Prisma fallback to fixture data when local tables are unavailable (`P2021` / init failures).
+- API route tests use Jest + Supertest with `../lib/prisma` mocked directly inside each route test file.
+
+---
+
+## 2026-03-18 18:58 Asia/Shanghai - US-002: 新增独立的企业名单 API 路由
+- Implemented a new `CompanyStore` in `server/src/models/Company.ts` with paginated list querying, keyword/status filters, and fixture fallback support for missing local Prisma tables.
+- Added a dedicated Express router in `server/src/routes/companies.ts` for `GET /api/companies`, returning list data with filters, pagination, and consistent `error` field handling.
+- Registered the new companies router in `server/src/routes/index.ts` without changing existing member, activity, or auth route wiring.
+- Added `server/src/__tests__/companies.test.ts` covering API registration, successful list payloads, query forwarding, fixture fallback behavior, independent `/api/members` behavior, and `CompanyStore` query construction.
+- Files changed: `server/src/models/Company.ts`, `server/src/routes/companies.ts`, `server/src/routes/index.ts`, `server/src/__tests__/companies.test.ts`, `progress-d0e9d918-23ac-4f16-a7b9-d7c608894b82.txt`.
+- **Learnings:** the project already has company fixture data and Prisma schema support, so the missing piece for this story was routing + store + tests, while existing end-to-end failures currently come from unrelated member/activity flows outside this story.
+---

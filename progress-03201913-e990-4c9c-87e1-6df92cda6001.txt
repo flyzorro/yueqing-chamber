@@ -1,0 +1,19 @@
+# Progress Log
+Run: 03201913-e990-4c9c-87e1-6df92cda6001
+Task: 为乐清商会项目新增“企业名单”独立模块。当前 story 为 US-001：新增独立 Company 数据模型与种子/夹具数据
+Started: 2026-03-18 14:54 Asia/Shanghai
+
+## Codebase Patterns
+- Server uses Prisma schema in `server/prisma/schema.prisma`, and the `server` build step runs `prisma generate && tsc` to refresh Prisma client types before TypeScript compilation.
+- Backend tests use Jest with `ts-jest`; API tests follow the pattern of mocking `../lib/prisma` and colocating specs in `server/src/__tests__/`.
+- When the local database or table is unavailable in non-production, list data can fall back to fixture files under `server/src/data/`.
+
+---
+
+## 2026-03-18 14:59 Asia/Shanghai - US-001: Add an independent Company data model and seed fixture data
+- Added an independent `Company` Prisma model in `server/prisma/schema.prisma` with basic company list-display fields and indexes for `status`, `name`, and `industry`.
+- Added `server/src/data/companyFixture.ts` with 6 seeded company fixture records for frontend fallback and future list endpoints.
+- Added `server/src/__tests__/companyFixture.test.ts` to verify fixture completeness/uniqueness and confirm the Prisma schema includes the dedicated `Company` model while keeping `Member`, `Activity`, and `Registration` definitions intact.
+- Files changed: `server/prisma/schema.prisma`, `server/src/data/companyFixture.ts`, `server/src/__tests__/companyFixture.test.ts`.
+- **Learnings:** this repo is currently working in a dirty branch state outside this story, so story work should stay narrowly scoped and commits should stage only the intended files.
+---

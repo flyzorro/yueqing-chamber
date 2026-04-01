@@ -17,9 +17,6 @@ export const API = {
   // 企业名单
   COMPANIES: `${API_BASE_URL}/api/companies`,
 
-  // 公务员名单
-  CIVIL_SERVANTS: `${API_BASE_URL}/api/civil-servants`,
-
   // 活动
   ACTIVITIES: `${API_BASE_URL}/api/activities`,
 

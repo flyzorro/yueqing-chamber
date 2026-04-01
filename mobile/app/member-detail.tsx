@@ -2,22 +2,20 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-export default function ActivityDetailScreen() {
+export default function MemberDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
     id?: string;
-    title?: string;
-    date?: string;
-    location?: string;
-    currentParticipants?: string;
-    maxParticipants?: string;
+    name?: string;
+    company?: string;
+    position?: string;
+    status?: string;
   }>();
 
-  const title = typeof params.title === 'string' ? params.title : '未命名活动';
-  const date = typeof params.date === 'string' ? params.date : '日期待定';
-  const location = typeof params.location === 'string' ? params.location : '地点待定';
-  const current = typeof params.currentParticipants === 'string' ? params.currentParticipants : '0';
-  const max = typeof params.maxParticipants === 'string' ? params.maxParticipants : '0';
+  const name = typeof params.name === 'string' ? params.name : '未命名会员';
+  const company = typeof params.company === 'string' ? params.company : '暂无企业信息';
+  const position = typeof params.position === 'string' ? params.position : '职位待补充';
+  const status = params.status === 'inactive' ? '非活跃' : '活跃';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -27,14 +25,14 @@ export default function ActivityDetailScreen() {
         </Pressable>
 
         <View style={styles.card}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.meta}>活动 ID：{params.id || '未提供'}</Text>
-          <Text style={styles.label}>时间</Text>
-          <Text style={styles.value}>{date}</Text>
-          <Text style={styles.label}>地点</Text>
-          <Text style={styles.value}>{location}</Text>
-          <Text style={styles.label}>报名人数</Text>
-          <Text style={styles.value}>{current} / {max}</Text>
+          <Text style={styles.title}>{name}</Text>
+          <Text style={styles.meta}>会员ID：{params.id || '未提供'}</Text>
+          <Text style={styles.label}>企业</Text>
+          <Text style={styles.value}>{company}</Text>
+          <Text style={styles.label}>职位</Text>
+          <Text style={styles.value}>{position}</Text>
+          <Text style={styles.label}>状态</Text>
+          <Text style={styles.value}>{status}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
