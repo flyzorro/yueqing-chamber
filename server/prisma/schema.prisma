@@ -20,7 +20,7 @@ model User {
 model Member {
   id            String         @id @default(cuid()) @db.VarChar
   name          String         @db.VarChar
-  phone         String         @db.VarChar
+  phone         String         @unique @db.VarChar
   email         String?        @db.VarChar
   company       String         @db.VarChar
   position      String?        @db.VarChar
