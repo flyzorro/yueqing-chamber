@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { activityStore } from '../models/Activity';
+import { activityPhotoStore } from '../models/ActivityPhoto';
 import { validateActivityCreate, validateActivityUpdate } from '../middleware/validator';
 
 const router = Router();
@@ -141,11 +142,11 @@ router.delete('/:id', async (req: Request, res: Response) => {
 router.post('/:id/register', async (req: Request, res: Response) => {
   try {
     const result = await activityStore.register(req.params.id);
-    
+
     if (!result.success) {
-      res.status(400).json({ 
-        success: false, 
-        error: result.error 
+      res.status(400).json({
+        success: false,
+        error: result.error
       });
       return;
     }
@@ -156,9 +157,46 @@ router.post('/:id/register', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Register activity error:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: '报名失败' 
+    res.status(500).json({
+      success: false,
+      error: '报名失败'
+    });
+  }
+});
+
+/**
+ * GET /api/activities/:id/photos
+ * 获取活动相册（纯展示）
+ */
+router.get('/:id/photos', async (req: Request, res: Response) => {
+  try {
+    const activity = await activityStore.getById(req.params.id);
+
+    if (!activity) {
+      res.status(404).json({
+        success: false,
+        error: '活动不存在'
+      });
+      return;
+    }
+
+    const photos = await activityPhotoStore.getByActivityId(req.params.id);
+
+    res.json({
+      success: true,
+      data: {
+        activity: {
+          id: activity.id,
+          title: activity.title,
+        },
+        photos,
+      },
+    });
+  } catch (error) {
+    console.error('Get activity photos error:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取活动相册失败'
     });
   }
 });
