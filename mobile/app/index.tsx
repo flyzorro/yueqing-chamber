@@ -44,8 +44,14 @@ export default function HomeScreen() {
           <View style={styles.menu}>
             <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/members')}>
               <Ionicons name="people" size={36} color="#007AFF" />
-              <Text style={styles.menuText}>会员中心</Text>
+              <Text style={styles.menuText}>商会成员名录</Text>
               <Text style={styles.menuDesc}>会员名录管理</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/companies')}>
+              <Ionicons name="business" size={36} color="#007AFF" />
+              <Text style={styles.menuText}>独立企业名录入口</Text>
+              <Text style={styles.menuDesc}>企业名单查询</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/activities')}>
@@ -58,12 +64,6 @@ export default function HomeScreen() {
               <Ionicons name="briefcase" size={36} color="#007AFF" />
               <Text style={styles.menuText}>商会服务</Text>
               <Text style={styles.menuDesc}>企业服务对接</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/profile')}>
-              <Ionicons name="person" size={36} color="#007AFF" />
-              <Text style={styles.menuText}>个人中心</Text>
-              <Text style={styles.menuDesc}>账户设置管理</Text>
             </TouchableOpacity>
           </View>
         </View>
