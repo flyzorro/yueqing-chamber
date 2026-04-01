@@ -81,9 +81,23 @@ model Activity {
   updatedat           DateTime?     @default(now()) @db.Timestamp(6)
 
   registrations       Registration[]
+  photos              ActivityPhoto[]
 
   @@index([date])
   @@index([status])
+}
+
+model ActivityPhoto {
+  id          String    @id @default(cuid()) @db.VarChar
+  activityId  String    @db.VarChar
+  imageUrl    String    @db.VarChar
+  caption     String?   @db.VarChar
+  sortorder   Int?      @default(0)
+  createdat   DateTime? @default(now()) @db.Timestamp(6)
+
+  activity    Activity  @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@index([activityId])
 }
 
 model Registration {
