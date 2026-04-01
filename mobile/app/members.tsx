@@ -158,8 +158,10 @@ export default function MembersScreen() {
   );
 
   useEffect(() => {
-    void fetchMembers(1);
-  }, [fetchMembers, queryString]);
+    if (isAuthenticated) {
+      void fetchMembers(1);
+    }
+  }, [fetchMembers, queryString, isAuthenticated]);
 
   const applySearch = () => {
     setKeyword(keywordInput.trim());
