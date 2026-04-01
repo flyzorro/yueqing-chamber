@@ -10,16 +10,19 @@ export const API = {
   // 认证
   LOGIN: `${API_BASE_URL}/api/auth/login`,
   REGISTER: `${API_BASE_URL}/api/auth/register`,
-  
+
   // 会员
   MEMBERS: `${API_BASE_URL}/api/members`,
-  
+
   // 企业名单
   COMPANIES: `${API_BASE_URL}/api/companies`,
-  
+
+  // 公务员名单
+  CIVIL_SERVANTS: `${API_BASE_URL}/api/civil-servants`,
+
   // 活动
   ACTIVITIES: `${API_BASE_URL}/api/activities`,
-  
+
   // 健康检查
   HEALTH: `${API_BASE_URL}/health`,
 };
