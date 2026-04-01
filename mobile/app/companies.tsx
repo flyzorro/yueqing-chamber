@@ -24,6 +24,23 @@ export interface Company {
 interface CompaniesResponse {
   success: boolean;
   data: Company[];
+  filters?: {
+    keyword?: string;
+    status?: string;
+    industry?: string;
+  };
+  pagination?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+  error?: string;
+}
+
+interface IndustriesResponse {
+  success: boolean;
+  data: string[];
   error?: string;
 }
 
@@ -31,12 +48,28 @@ export const COMPANY_PAGE_SIZE = 20;
 
 export default function CompaniesScreen() {
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [industries, setIndustries] = useState<string[]>([]);
+  const [selectedIndustry, setSelectedIndustry] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
 
-  const fetchCompanies = useCallback(async (options?: { refresh?: boolean }) => {
+  const fetchIndustries = useCallback(async () => {
+    try {
+      const response = await fetch(API.COMPANIES + '/industries');
+      const json = (await response.json()) as IndustriesResponse;
+
+      if (response.ok && json.success) {
+        setIndustries(json.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch industries:', err);
+    }
+  }, []);
+
+  const fetchCompanies = useCallback(async (options?: { refresh?: boolean; industry?: string }) => {
     const refresh = options?.refresh ?? false;
+    const industry = options?.industry || selectedIndustry;
 
     setError('');
     if (!refresh) {
@@ -48,6 +81,10 @@ export default function CompaniesScreen() {
         page: '1',
         limit: String(COMPANY_PAGE_SIZE),
       });
+
+      if (industry && industry !== 'all') {
+        params.set('industry', industry);
+      }
 
       const response = await fetch(`${API.COMPANIES}?${params.toString()}`);
       const json = (await response.json()) as CompaniesResponse;
@@ -65,11 +102,19 @@ export default function CompaniesScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [selectedIndustry]);
+
+  useEffect(() => {
+    void fetchIndustries();
+  }, [fetchIndustries]);
 
   useEffect(() => {
     void fetchCompanies();
   }, [fetchCompanies]);
+
+  const handleIndustrySelect = useCallback((industry: string) => {
+    setSelectedIndustry(industry);
+  }, []);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -114,16 +159,74 @@ export default function CompaniesScreen() {
     return (
       <View style={styles.stateContainer}>
         <Text style={styles.stateTitle}>暂无企业信息</Text>
-        <Text style={styles.stateDescription}>企业名单更新后会展示在这里</Text>
+        {selectedIndustry !== 'all' ? (
+          <Text style={styles.stateDescription}>
+            当前筛选条件：{selectedIndustry}
+            {'\n'}试试选择"全部"或其他行业
+          </Text>
+        ) : (
+          <Text style={styles.stateDescription}>企业名单更新后会展示在这里</Text>
+        )}
       </View>
     );
   };
+
+  const allFilterItem = (
+    <Pressable
+      key="all"
+      style={[
+        styles.filterChip,
+        selectedIndustry === 'all' && styles.filterChipSelected,
+      ]}
+      onPress={() => handleIndustrySelect('all')}
+    >
+      <Text
+        style={[
+          styles.filterChipText,
+          selectedIndustry === 'all' && styles.filterChipTextSelected,
+        ]}
+      >
+        全部
+      </Text>
+    </Pressable>
+  );
+
+  const industryFilterItems = industries.map((industry) => (
+    <Pressable
+      key={industry}
+      style={[
+        styles.filterChip,
+        selectedIndustry === industry && styles.filterChipSelected,
+      ]}
+      onPress={() => handleIndustrySelect(industry)}
+    >
+      <Text
+        style={[
+          styles.filterChipText,
+          selectedIndustry === industry && styles.filterChipTextSelected,
+        ]}
+      >
+        {industry}
+      </Text>
+    </Pressable>
+  ));
+
+  const renderFilters = () => (
+    <View style={styles.filtersContent}>
+      {allFilterItem}
+      {industryFilterItems}
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>企业名单</Text>
-        <Text style={styles.subtitle}>独立展示商会企业名录，方便快速浏览基础信息</Text>
+        <Text style={styles.subtitle}>按行业分类展示商会企业名录</Text>
+      </View>
+
+      <View style={styles.filtersContainer}>
+        {renderFilters()}
       </View>
 
       {loading ? (
@@ -165,6 +268,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     color: '#4E5969',
+  },
+  filtersContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+  },
+  filtersContent: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  filterChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E5E6EB',
+    marginRight: 8,
+  },
+  filterChipSelected: {
+    backgroundColor: '#E8F3FF',
+    borderColor: '#1677FF',
+  },
+  filterChipText: {
+    fontSize: 14,
+    color: '#4E5969',
+  },
+  filterChipTextSelected: {
+    color: '#1677FF',
+    fontWeight: '600',
   },
   loadingContainer: {
     flex: 1,

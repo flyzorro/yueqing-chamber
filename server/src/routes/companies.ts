@@ -6,7 +6,7 @@ const VALID_COMPANY_STATUS = new Set(['active', 'inactive']);
 
 /**
  * GET /api/companies
- * 获取企业名单列表（分页 + 搜索 + 状态筛选）
+ * 获取企业名单列表（分页 + 搜索 + 状态筛选 + 行业筛选）
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
@@ -14,6 +14,7 @@ router.get('/', async (req: Request, res: Response) => {
     const limit = Math.max(parseInt(req.query.limit as string, 10) || 10, 1);
     const keyword = typeof req.query.keyword === 'string' ? req.query.keyword.trim() : '';
     const rawStatus = typeof req.query.status === 'string' ? req.query.status.trim() : '';
+    const industry = typeof req.query.industry === 'string' ? req.query.industry.trim() : '';
     const status = VALID_COMPANY_STATUS.has(rawStatus) ? (rawStatus as 'active' | 'inactive') : undefined;
 
     const result = await companyStore.getPaginated({
@@ -21,6 +22,7 @@ router.get('/', async (req: Request, res: Response) => {
       limit,
       keyword,
       status,
+      industry: industry || undefined,
     });
 
     res.json({
@@ -29,6 +31,7 @@ router.get('/', async (req: Request, res: Response) => {
       filters: {
         keyword,
         status: status || 'all',
+        industry: industry || 'all',
       },
       pagination: {
         total: result.total,
@@ -46,6 +49,29 @@ router.get('/', async (req: Request, res: Response) => {
       filters: null,
       pagination: null,
       error: '获取企业列表失败',
+    });
+  }
+});
+
+/**
+ * GET /api/companies/industries
+ * 获取所有行业分类
+ */
+router.get('/industries', async (req: Request, res: Response) => {
+  try {
+    const industries = await companyStore.getIndustries();
+
+    res.json({
+      success: true,
+      data: industries,
+      error: null,
+    });
+  } catch (error) {
+    console.error('Get industries error:', error);
+    res.status(500).json({
+      success: false,
+      data: [],
+      error: '获取行业分类失败',
     });
   }
 });

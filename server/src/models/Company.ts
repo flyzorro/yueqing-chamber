@@ -7,6 +7,7 @@ export interface CompanyListFilters {
   limit?: number;
   keyword?: string;
   status?: 'active' | 'inactive';
+  industry?: string;
 }
 
 export class CompanyStore {
@@ -16,6 +17,10 @@ export class CompanyStore {
 
     if (filters.status) {
       where.status = filters.status;
+    }
+
+    if (filters.industry) {
+      where.industry = filters.industry;
     }
 
     if (keyword) {
@@ -81,12 +86,13 @@ export class CompanyStore {
 
     const filtered = companyFixtureData.filter((company) => {
       const matchesStatus = filters.status ? company.status === filters.status : true;
+      const matchesIndustry = filters.industry ? company.industry === filters.industry : true;
       const matchesKeyword = keyword
         ? [company.name, company.industry ?? '', company.contactName ?? '']
             .some((value) => value.toLowerCase().includes(keyword))
         : true;
 
-      return matchesStatus && matchesKeyword;
+      return matchesStatus && matchesIndustry && matchesKeyword;
     });
 
     const start = (page - 1) * limit;
@@ -122,6 +128,28 @@ export class CompanyStore {
       if (this.shouldUseFixtureFallback(error)) {
         console.warn('[companies] Prisma unavailable, using fixture data for getPaginated');
         return this.getFixtureCompanies(filters);
+      }
+      throw error;
+    }
+  }
+
+  async getIndustries(): Promise<string[]> {
+    try {
+      const result = await prisma.company.findMany({
+        select: { industry: true },
+        distinct: ['industry'],
+        where: {
+          industry: { not: null },
+        },
+        orderBy: { industry: 'asc' },
+      });
+      return result.map((c) => c.industry!).filter(Boolean);
+    } catch (error) {
+      if (this.shouldUseFixtureFallback(error)) {
+        const industries = Array.from(
+          new Set(companyFixtureData.map((c) => c.industry).filter((i): i is string => Boolean(i)))
+        ).sort();
+        return industries;
       }
       throw error;
     }
