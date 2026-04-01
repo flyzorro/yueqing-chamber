@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { memberStore } from '../models/Member';
+import { authenticate } from '../middleware/auth';
 import { validateMemberCreate, validateMemberUpdate } from '../middleware/validator';
 
 const router = Router();
@@ -7,9 +8,9 @@ const VALID_MEMBER_STATUS = new Set(['active', 'inactive']);
 
 /**
  * GET /api/members
- * 获取会员列表（分页 + 搜索 + 状态筛选）
+ * 获取会员列表（分页 + 搜索 + 状态筛选）- 需要登录
  */
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', authenticate, async (req: Request, res: Response) => {
   try {
     const page = Math.max(parseInt(req.query.page as string, 10) || 1, 1);
     const limit = Math.max(parseInt(req.query.limit as string, 10) || 10, 1);
@@ -149,9 +150,9 @@ router.delete('/:id', async (req: Request, res: Response) => {
 
 /**
  * GET /api/members/:id/details
- * 获取会员详情（包含最近活动和报名记录）
+ * 获取会员详情（包含最近活动和报名记录）- 需要登录
  */
-router.get('/:id/details', async (req: Request, res: Response) => {
+router.get('/:id/details', authenticate, async (req: Request, res: Response) => {
   try {
     const details = await memberStore.getDetails(req.params.id);
     
