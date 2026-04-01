@@ -32,3 +32,18 @@ playwright-report/
 __pycache__/
 .spectra/
 openspec/.vector-search.db*
+
+# ClawTeam / OpenClaw
+.clawteam/
+.clawteam-worktrees/
+.worktrees/
+.openclaw/
+.clawdbot/
+
+# OpenSpec
+.openspec/
+
+# Agent / AI tools
+.agents/
+*.prompt.md
+skills/
