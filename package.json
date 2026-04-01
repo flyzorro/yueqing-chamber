@@ -3,8 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "check:runtime-contract": "bash scripts/check-runtime-contract.sh",
-    "check:live-runtime-contract": "bash scripts/check-live-runtime-contract.sh",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"
   },
