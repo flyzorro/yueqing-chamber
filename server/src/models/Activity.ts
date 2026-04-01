@@ -96,22 +96,26 @@ export class ActivityStore {
   // 报名活动
   async register(id: string) {
     const activity = await this.getById(id);
-    
+
     if (!activity) {
       return { success: false, error: '活动不存在' };
     }
 
-    const current = activity.currentparticipants || 0;
-    if (current >= activity.maxparticipants) {
-      return { success: false, error: '报名人数已满' };
-    }
-
-    await prisma.activity.update({
-      where: { id },
+    // Use atomic increment with WHERE clause to prevent race conditions
+    // This ensures the update only succeeds if capacity is available
+    const result = await prisma.activity.updateMany({
+      where: {
+        id,
+        currentparticipants: { lt: activity.maxparticipants }
+      },
       data: {
-        currentparticipants: current + 1
+        currentparticipants: { increment: 1 }
       }
     });
+
+    if (result.count === 0) {
+      return { success: false, error: '报名人数已满' };
+    }
 
     return { success: true };
   }

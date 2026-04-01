@@ -1,0 +1,230 @@
+import request from 'supertest';
+import express from 'express';
+import companiesRouter from '../routes/companies';
+import membersRouter from '../routes/members';
+import prisma from '../lib/prisma';
+import { CompanyStore } from '../models/Company';
+
+jest.mock('../lib/prisma', () => ({
+  __esModule: true,
+  default: {
+    company: {
+      findMany: jest.fn(),
+      count: jest.fn(),
+    },
+    member: {
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+    },
+    registration: {
+      count: jest.fn(),
+    },
+  },
+}));
+
+const app = express();
+app.use(express.json());
+app.use('/api/companies', companiesRouter);
+app.use('/api/members', membersRouter);
+
+describe('Companies API', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('GET /api/companies', () => {
+    it('should return paginated companies', async () => {
+      const mockCompanies = [
+        {
+          id: 'company-1',
+          name: '月清科技',
+          industry: '科技服务',
+          contactName: '张恺毅',
+          phone: '13800139001',
+          address: '乐清市总部经济园',
+          logo: 'https://example.com/logo.png',
+          status: 'active',
+          createdat: new Date(),
+          updatedat: new Date(),
+        },
+        {
+          id: 'company-2',
+          name: '乐清制造集团',
+          industry: '智能制造',
+          contactName: '王小明',
+          phone: '13800139002',
+          address: '乐清市经济开发区',
+          logo: 'https://example.com/logo2.png',
+          status: 'active',
+          createdat: new Date(),
+          updatedat: new Date(),
+        },
+      ];
+
+      (prisma.company.findMany as jest.Mock).mockResolvedValue(mockCompanies);
+      (prisma.company.count as jest.Mock).mockResolvedValue(2);
+
+      const response = await request(app).get('/api/companies?page=1&limit=10');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toHaveLength(2);
+      expect(response.body.data[0].name).toBe('月清科技');
+      expect(response.body.pagination.total).toBe(2);
+      expect(prisma.company.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderBy: { createdat: 'desc' },
+        })
+      );
+    });
+
+    it('should support keyword, status and industry filters', async () => {
+      const mockCompanies = [{ id: '1', name: '月清科技', industry: '科技服务', status: 'active' }];
+
+      (prisma.company.findMany as jest.Mock).mockResolvedValue(mockCompanies);
+      (prisma.company.count as jest.Mock).mockResolvedValue(1);
+
+      const response = await request(app).get(
+        '/api/companies?page=1&limit=10&keyword=科技&status=active&industry=科技服务'
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body.filters).toEqual({ keyword: '科技', status: 'active', industry: '科技服务' });
+      expect(prisma.company.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            status: 'active',
+            industry: '科技服务',
+            OR: expect.any(Array),
+          }),
+        })
+      );
+    });
+
+    it('should fall back to fixture companies when prisma table is missing', async () => {
+      const prismaError = new Error('The table public.Company does not exist') as Error & { code?: string };
+      prismaError.code = 'P2021';
+
+      (prisma.company.findMany as jest.Mock).mockRejectedValue(prismaError);
+      (prisma.company.count as jest.Mock).mockRejectedValue(prismaError);
+
+      const response = await request(app).get('/api/companies?page=1&limit=10&keyword=科技&status=active');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.length).toBeGreaterThan(0);
+      expect(response.body.data[0].name).toContain('科技');
+      expect(response.body.filters).toEqual({ keyword: '科技', status: 'active', industry: 'all' });
+    });
+
+    it('should return 500 on unexpected database error', async () => {
+      (prisma.company.findMany as jest.Mock).mockRejectedValue(new Error('Database error'));
+
+      const response = await request(app).get('/api/companies');
+
+      expect(response.status).toBe(500);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error).toBe('获取企业列表失败');
+    });
+  });
+
+  describe('GET /api/companies/industries', () => {
+    it('should return list of industries', async () => {
+      const mockIndustries = ['科技服务', '智能制造', '商贸服务'];
+
+      (prisma.company.findMany as jest.Mock).mockResolvedValue(
+        mockIndustries.map((industry) => ({ industry }))
+      );
+
+      const response = await request(app).get('/api/companies/industries');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toEqual(mockIndustries);
+    });
+
+    it('should return 500 on database error', async () => {
+      (prisma.company.findMany as jest.Mock).mockRejectedValue(new Error('Database error'));
+
+      const response = await request(app).get('/api/companies/industries');
+
+      expect(response.status).toBe(500);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error).toBe('获取行业分类失败');
+    });
+  });
+});
+
+describe('CompanyStore', () => {
+  let store: CompanyStore;
+
+  beforeEach(() => {
+    store = new CompanyStore();
+    jest.clearAllMocks();
+  });
+
+  it('should return paginated company data from prisma', async () => {
+    const mockCompanies = [{ id: 'company-1', name: '月清科技', industry: '科技服务' }];
+
+    (prisma.company.findMany as jest.Mock).mockResolvedValue(mockCompanies);
+    (prisma.company.count as jest.Mock).mockResolvedValue(1);
+
+    const result = await store.getPaginated({ page: 1, limit: 10, keyword: '科技', status: 'active' });
+
+    expect(result.data).toEqual(mockCompanies);
+    expect(result.total).toBe(1);
+    expect(prisma.company.count).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          status: 'active',
+          OR: expect.any(Array),
+        }),
+      })
+    );
+  });
+
+  it('should use fixture data fallback when prisma company table is unavailable', async () => {
+    const prismaError = new Error('The table public.Company does not exist') as Error & { code?: string };
+    prismaError.code = 'P2021';
+
+    (prisma.company.findMany as jest.Mock).mockRejectedValue(prismaError);
+    (prisma.company.count as jest.Mock).mockRejectedValue(prismaError);
+
+    const result = await store.getPaginated({ page: 1, limit: 10, keyword: '科技', status: 'active' });
+
+    expect(result.total).toBeGreaterThan(0);
+    expect(result.data[0].name).toContain('科技');
+  });
+
+  it('should return industries list from prisma', async () => {
+    const mockIndustries = [{ industry: '科技服务' }, { industry: '智能制造' }];
+
+    (prisma.company.findMany as jest.Mock).mockResolvedValue(mockIndustries);
+
+    const result = await store.getIndustries();
+
+    expect(result).toEqual(['科技服务', '智能制造']);
+    expect(prisma.company.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        select: { industry: true },
+        distinct: ['industry'],
+      })
+    );
+  });
+
+  it('should use fixture data for getIndustries when prisma unavailable', async () => {
+    const prismaError = new Error('The table public.Company does not exist') as Error & { code?: string };
+    prismaError.code = 'P2021';
+
+    (prisma.company.findMany as jest.Mock).mockRejectedValue(prismaError);
+
+    const result = await store.getIndustries();
+
+    expect(result.length).toBeGreaterThan(0);
+    expect(result).toContain('信息技术');
+  });
+});

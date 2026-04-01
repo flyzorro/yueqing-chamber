@@ -20,7 +20,7 @@ model User {
 model Member {
   id            String         @id @default(cuid()) @db.VarChar
   name          String         @db.VarChar
-  phone         String         @db.VarChar
+  phone         String         @unique @db.VarChar
   email         String?        @db.VarChar
   company       String         @db.VarChar
   position      String?        @db.VarChar
@@ -33,6 +33,39 @@ model Member {
 
   @@index([phone])
   @@index([status])
+}
+
+model Company {
+  id          String    @id @default(cuid()) @db.VarChar
+  name        String    @db.VarChar
+  industry    String?   @db.VarChar
+  contactName String?   @db.VarChar
+  phone       String?   @db.VarChar
+  address     String?   @db.VarChar
+  logo        String?   @db.VarChar
+  status      String?   @default("active") @db.VarChar
+  createdat   DateTime? @default(now()) @db.Timestamp(6)
+  updatedat   DateTime? @default(now()) @db.Timestamp(6)
+
+  @@index([status])
+  @@index([name])
+  @@index([industry])
+}
+
+model CivilServant {
+  id          String    @id @default(cuid()) @db.VarChar
+  name        String    @db.VarChar
+  department  String?   @db.VarChar
+  position    String?   @db.VarChar
+  phone       String?   @db.VarChar
+  email       String?   @db.VarChar
+  status      String?   @default("active") @db.VarChar
+  createdat   DateTime? @default(now()) @db.Timestamp(6)
+  updatedat   DateTime? @default(now()) @db.Timestamp(6)
+
+  @@index([status])
+  @@index([name])
+  @@index([department])
 }
 
 model Activity {
@@ -48,9 +81,23 @@ model Activity {
   updatedat           DateTime?     @default(now()) @db.Timestamp(6)
 
   registrations       Registration[]
+  photos              ActivityPhoto[]
 
   @@index([date])
   @@index([status])
+}
+
+model ActivityPhoto {
+  id          String    @id @default(cuid()) @db.VarChar
+  activityId  String    @db.VarChar
+  imageUrl    String    @db.VarChar
+  caption     String?   @db.VarChar
+  sortorder   Int?      @default(0)
+  createdat   DateTime? @default(now()) @db.Timestamp(6)
+
+  activity    Activity  @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@index([activityId])
 }
 
 model Registration {
