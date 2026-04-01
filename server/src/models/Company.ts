@@ -32,6 +32,12 @@ export class CompanyStore {
             mode: 'insensitive',
           },
         },
+        {
+          contactName: {
+            contains: keyword,
+            mode: 'insensitive',
+          },
+        },
       ];
     }
 
@@ -76,26 +82,19 @@ export class CompanyStore {
     const filtered = companyFixtureData.filter((company) => {
       const matchesStatus = filters.status ? company.status === filters.status : true;
       const matchesKeyword = keyword
-        ? company.name.toLowerCase().includes(keyword) || (company.industry ?? '').toLowerCase().includes(keyword)
+        ? [company.name, company.industry ?? '', company.contactName ?? '']
+            .some((value) => value.toLowerCase().includes(keyword))
         : true;
 
       return matchesStatus && matchesKeyword;
     });
 
-    const sorted = [...filtered].sort((a, b) => {
-      const sortDiff = (a.sortorder ?? 0) - (b.sortorder ?? 0);
-      if (sortDiff !== 0) {
-        return sortDiff;
-      }
-      return a.createdat && b.createdat ? b.createdat.getTime() - a.createdat.getTime() : 0;
-    });
-
     const start = (page - 1) * limit;
-    const data = sorted.slice(start, start + limit);
+    const data = filtered.slice(start, start + limit);
 
     return {
       data,
-      total: sorted.length,
+      total: filtered.length,
       page,
       limit,
     };
@@ -113,7 +112,7 @@ export class CompanyStore {
           where,
           skip,
           take: limit,
-          orderBy: [{ sortorder: 'asc' }, { createdat: 'desc' }],
+          orderBy: { createdat: 'desc' },
         }),
         prisma.company.count({ where }),
       ]);

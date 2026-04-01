@@ -1,15 +1,8 @@
 import { Tabs } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
-import { useFonts } from 'expo-font';
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts(Ionicons.font);
-
-  if (!fontsLoaded) {
-    return null;
-  }
-
   return (
     <>
       <StatusBar style="auto" />
@@ -30,6 +23,27 @@ export default function RootLayout() {
           },
         }}
       >
+        <Tabs.Screen
+          name="member-detail"
+          options={{
+            href: null,
+            title: '会员详情',
+          }}
+        />
+        <Tabs.Screen
+          name="activity-detail"
+          options={{
+            href: null,
+            title: '活动详情',
+          }}
+        />
+        <Tabs.Screen
+          name="login"
+          options={{
+            href: null,
+            title: '登录',
+          }}
+        />
         <Tabs.Screen
           name="index"
           options={{

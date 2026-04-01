@@ -36,20 +36,20 @@ model Member {
 }
 
 model Company {
-  id           String    @id @default(cuid()) @db.VarChar
-  name         String    @db.VarChar
-  industry     String?   @db.VarChar
-  contactName  String?   @db.VarChar
-  contactPhone String?   @db.VarChar
-  summary      String?
-  status       String?   @default("active") @db.VarChar
-  sortorder    Int?      @default(0)
-  createdat    DateTime? @default(now()) @db.Timestamp(6)
-  updatedat    DateTime? @default(now()) @db.Timestamp(6)
+  id          String    @id @default(cuid()) @db.VarChar
+  name        String    @db.VarChar
+  industry    String?   @db.VarChar
+  contactName String?   @db.VarChar
+  phone       String?   @db.VarChar
+  address     String?   @db.VarChar
+  logo        String?   @db.VarChar
+  status      String?   @default("active") @db.VarChar
+  createdat   DateTime? @default(now()) @db.Timestamp(6)
+  updatedat   DateTime? @default(now()) @db.Timestamp(6)
 
-  @@index([name])
   @@index([status])
-  @@index([sortorder])
+  @@index([name])
+  @@index([industry])
 }
 
 model Activity {
