@@ -1,3 +1,11 @@
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.secret
+
 # Dependencies
 node_modules/
 
@@ -17,4 +25,25 @@ build/
 
 # Testing
 coverage/
-playwright-report/node_modules/
+.nyc_output/
+playwright-report/
+
+# Python
+__pycache__/
+.spectra/
+openspec/.vector-search.db*
+
+# ClawTeam / OpenClaw
+.clawteam/
+.clawteam-worktrees/
+.worktrees/
+.openclaw/
+.clawdbot/
+
+# OpenSpec
+.openspec/
+
+# Agent / AI tools
+.agents/
+*.prompt.md
+skills/
