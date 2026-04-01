@@ -52,6 +52,22 @@ model Company {
   @@index([industry])
 }
 
+model CivilServant {
+  id          String    @id @default(cuid()) @db.VarChar
+  name        String    @db.VarChar
+  department  String?   @db.VarChar
+  position    String?   @db.VarChar
+  phone       String?   @db.VarChar
+  email       String?   @db.VarChar
+  status      String?   @default("active") @db.VarChar
+  createdat   DateTime? @default(now()) @db.Timestamp(6)
+  updatedat   DateTime? @default(now()) @db.Timestamp(6)
+
+  @@index([status])
+  @@index([name])
+  @@index([department])
+}
+
 model Activity {
   id                  String        @id @default(cuid()) @db.VarChar
   title               String        @db.VarChar
