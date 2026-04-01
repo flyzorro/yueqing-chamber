@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'expo-router';
 import {
   ActivityIndicator,
   FlatList,
@@ -11,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { API } from './utils/api';
+import { isLoggedIn } from './utils/auth';
 
 type MemberStatus = 'all' | 'active' | 'inactive';
 
@@ -46,6 +48,7 @@ const STATUS_OPTIONS: Array<{ label: string; value: MemberStatus }> = [
 ];
 
 export default function MembersScreen() {
+  const router = useRouter();
   const [members, setMembers] = useState<Member[]>([]);
   const [keywordInput, setKeywordInput] = useState('');
   const [keyword, setKeyword] = useState('');
@@ -56,6 +59,24 @@ export default function MembersScreen() {
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check login status on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      const loggedIn = await isLoggedIn();
+      setIsAuthenticated(loggedIn);
+
+      if (!loggedIn) {
+        // Redirect to login after a short delay to show the message
+        setTimeout(() => {
+          router.push('/login');
+        }, 2000);
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams({
@@ -102,6 +123,12 @@ export default function MembersScreen() {
         }
 
         const response = await fetch(`${API.MEMBERS}?${params.toString()}`);
+
+        // Handle 401 Unauthorized
+        if (response.status === 401) {
+          throw new Error('请先登录后查看会员通讯录');
+        }
+
         const json = (await response.json()) as MembersResponse;
 
         if (!response.ok || !json.success) {
@@ -177,6 +204,22 @@ export default function MembersScreen() {
   const renderEmpty = () => {
     if (loading) {
       return null;
+    }
+
+    // Show login prompt if not authenticated
+    if (!isAuthenticated) {
+      return (
+        <View style={styles.stateContainer}>
+          <Text style={styles.stateTitle}>会员通讯录</Text>
+          <Text style={styles.stateDescription}>
+            根据商会规定，会员通讯录仅对登录会员开放
+            {'\n'}请先登录后查看
+          </Text>
+          <Pressable style={styles.primaryButton} onPress={() => router.push('/login')}>
+            <Text style={styles.primaryButtonText}>去登录</Text>
+          </Pressable>
+        </View>
+      );
     }
 
     if (error) {
