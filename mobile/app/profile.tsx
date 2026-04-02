@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { getUser, clearAuthData, User } from './utils/auth';
 
 export default function ProfileScreen() {
@@ -10,11 +10,8 @@ export default function ProfileScreen() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadUser();
-  }, []);
-
-  const loadUser = async () => {
+  const loadUser = useCallback(async () => {
+    setLoading(true);
     try {
       const userData = await getUser();
       setUser(userData);
@@ -23,7 +20,12 @@ export default function ProfileScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Re-run when screen comes into focus (e.g. after login redirect)
+  useFocusEffect(useCallback(() => {
+    loadUser();
+  }, [loadUser]));
 
   const handleLogout = () => {
     Alert.alert('确认', '确定要退出登录吗？', [
