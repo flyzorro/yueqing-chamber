@@ -1,20 +1,16 @@
 language: zh-CN
 early_access: false
 reviews:
-  profile: ai-assertive
-  high_level_summary:
-    auto_title: always
-    poem: false
-    verify_linking: false
-  collapsewalkthrough: false
+  profile: assertive
+  high_level_summary: true
+  collapse_walkthrough: false
   sequence_diagrams: true
   path_filters:
-    exclude:
-      - "**/*.md"
-      - "**/node_modules/**"
-      - "**/.expo/**"
-      - "**/dist/**"
-      - "**/build/**"
+    - "!**/*.md"
+    - "!**/node_modules/**"
+    - "!**/.expo/**"
+    - "!**/dist/**"
+    - "!**/build/**"
   path_instructions:
     - path: "**/*.tsx"
       instructions: >
