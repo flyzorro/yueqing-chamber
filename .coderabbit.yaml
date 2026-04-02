@@ -1,0 +1,35 @@
+language: zh-CN
+early_access: false
+reviews:
+  profile: assertive
+  high_level_summary: true
+  collapse_walkthrough: false
+  sequence_diagrams: true
+  path_filters:
+    - "!**/*.md"
+    - "!**/node_modules/**"
+    - "!**/.expo/**"
+    - "!**/dist/**"
+    - "!**/build/**"
+  path_instructions:
+    - path: "**/*.tsx"
+      instructions: >
+        Review React Native / Expo code:
+        - Check component naming conventions
+        - Verify state management is correct
+        - Check for performance issues (unnecessary re-renders)
+        - Verify accessibility (alt text, touchable areas)
+    - path: "**/*.ts"
+      instructions: >
+        Review TypeScript code:
+        - Check type safety
+        - Verify error handling
+        - Check for null/undefined handling
+    - path: "server/**"
+      instructions: >
+        Review Node.js/Express backend:
+        - Check API route structure
+        - Verify authentication/authorization
+        - Check database query safety
+chat:
+  auto_reply: true
