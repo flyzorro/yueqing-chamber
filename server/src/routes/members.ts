@@ -49,6 +49,29 @@ router.get('/', authenticate, async (req: Request, res: Response) => {
 });
 
 /**
+ * GET /api/members/industries
+ * 获取所有企业所在行业分类（从 company 字段提取）
+ */
+router.get('/industries', async (req: Request, res: Response) => {
+  try {
+    const industries = await memberStore.getIndustries();
+
+    res.json({
+      success: true,
+      data: industries,
+      error: null,
+    });
+  } catch (error) {
+    console.error('Get industries error:', error);
+    res.status(500).json({
+      success: false,
+      data: [],
+      error: '获取行业分类失败',
+    });
+  }
+});
+
+/**
  * GET /api/members/:id
  * 获取单个会员
  */
@@ -173,29 +196,6 @@ router.get('/:id/details', authenticate, async (req: Request, res: Response) => 
     res.status(500).json({ 
       success: false, 
       error: '获取会员详情失败' 
-    });
-  }
-});
-
-/**
- * GET /api/members/industries
- * 获取所有企业所在行业分类（从 company 字段提取）
- */
-router.get('/industries', async (req: Request, res: Response) => {
-  try {
-    const industries = await memberStore.getIndustries();
-
-    res.json({
-      success: true,
-      data: industries,
-      error: null,
-    });
-  } catch (error) {
-    console.error('Get industries error:', error);
-    res.status(500).json({
-      success: false,
-      data: [],
-      error: '获取行业分类失败',
     });
   }
 });
