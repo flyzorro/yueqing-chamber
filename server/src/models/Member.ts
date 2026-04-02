@@ -266,6 +266,27 @@ export class MemberStore {
     return member;
   }
 
+  // 获取所有行业分类（从 company 字段提取）
+  async getIndustries(): Promise<string[]> {
+    try {
+      const members = await prisma.member.findMany({
+        where: { status: 'active' },
+        select: { company: true },
+      });
+      const companies = members.map((m) => m.company).filter(Boolean);
+      const industries = Array.from(new Set(companies)).sort();
+      return industries;
+    } catch (error) {
+      if (this.shouldUseFixtureFallback(error)) {
+        const companies = memberFixtureData
+          .filter((m) => m.status === 'active')
+          .map((m) => m.company);
+        return Array.from(new Set(companies)).sort();
+      }
+      throw error;
+    }
+  }
+
   // 删除会员
   async delete(id: string) {
     await prisma.member.delete({

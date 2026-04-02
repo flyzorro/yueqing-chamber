@@ -1,9 +1,7 @@
 import request from 'supertest';
-import { createApp } from '../index';
+import app from '../app';
 
 describe('Server runtime boundary', () => {
-  const app = createApp();
-
   it('keeps health endpoint available', async () => {
     const response = await request(app).get('/health');
 

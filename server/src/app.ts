@@ -22,7 +22,11 @@ export function createApp() {
   app.use('/dashboard', express.static(dashboardPath));
 
   app.get('/', (_req, res) => {
-    res.sendFile(path.join(dashboardPath, 'index.html'));
+    res.sendFile(path.join(dashboardPath, 'index.html'), (err) => {
+      if (err) {
+        res.status(404).json({ success: false, error: 'Not Found', message: '/api' });
+      }
+    });
   });
 
   app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -30,6 +34,11 @@ export function createApp() {
 
   app.get('/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  // 404 handler - must be last
+  app.use((_req, res) => {
+    res.status(404).json({ success: false, error: 'Not Found', message: '/api' });
   });
 
   return app;
