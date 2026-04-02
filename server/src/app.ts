@@ -36,11 +36,6 @@ export function createApp() {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
-  // 404 handler - must be last
-  app.use((_req, res) => {
-    res.status(404).json({ success: false, error: 'Not Found', message: '/api' });
-  });
-
   return app;
 }
 
