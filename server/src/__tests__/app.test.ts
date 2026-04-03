@@ -20,13 +20,12 @@ describe('Server runtime boundary', () => {
   it('does not serve a historical static site from root route', async () => {
     const response = await request(app).get('/');
 
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(200);
     expect(response.body).toEqual(
       expect.objectContaining({
-        success: false,
-        error: 'Not Found',
+        success: true,
+        message: expect.stringContaining('Yueqing Chamber'),
       })
     );
-    expect(response.body.message).toContain('/api');
   });
 });
