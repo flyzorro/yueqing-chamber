@@ -17,7 +17,6 @@ export const API = {
 
   // 会员 / 企业
   MEMBERS: `${API_BASE_URL}/api/members`,
-  COMPANIES: `${API_BASE_URL}/api/members`,
 
   // 企业
   COMPANIES: `${API_BASE_URL}/api/companies`,
