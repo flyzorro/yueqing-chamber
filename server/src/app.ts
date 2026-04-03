@@ -8,6 +8,8 @@ import swaggerDocument from './swagger.json';
 
 dotenv.config();
 
+const dashboardPath = path.join(__dirname, '../../dashboard');
+
 export function createApp() {
   const app = express();
 
@@ -17,9 +19,6 @@ export function createApp() {
 
   app.use(cors());
   app.use(express.json());
-
-  const dashboardPath = path.join(process.cwd(), 'dashboard');
-  app.use('/dashboard', express.static(dashboardPath));
 
   app.get('/', (_req, res) => {
     res.sendFile(path.join(dashboardPath, 'index.html'), (err) => {
@@ -34,6 +33,10 @@ export function createApp() {
 
   app.get('/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  app.use((_req, res) => {
+    res.status(404).json({ success: false, error: 'Not Found', message: 'Use /api, /api/docs, or /health.' });
   });
 
   return app;
