@@ -1,4 +1,5 @@
 import { test, expect, request as createRequest } from '@playwright/test';
+import { default as playwrightConfig } from '../playwright.config';
 
 // Shared auth token and API context across tests
 let authToken: string;
@@ -7,7 +8,7 @@ let api: Awaited<ReturnType<typeof createRequest.newContext>>;
 
 test.beforeAll(async () => {
   // Register a test user
-  api = await createRequest.newContext({ baseURL: 'http://localhost:3000' });
+  api = await createRequest.newContext({ baseURL: playwrightConfig.use.baseURL as string });
 
   const regRes = await api.post('/api/auth/register', {
     data: { phone: TEST_PHONE, password: 'test123456', name: 'E2E Test User' },
