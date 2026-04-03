@@ -6,8 +6,8 @@ const TEST_PHONE = `138${Date.now().toString().slice(-8)}`;
 let api: Awaited<ReturnType<typeof createRequest.newContext>>;
 
 test.beforeAll(async () => {
-  // Register a test user — reuse global baseURL from playwright.config.ts
-  api = await createRequest.newContext();
+  // Register a test user
+  api = await createRequest.newContext({ baseURL: 'http://localhost:3000' });
 
   const regRes = await api.post('/api/auth/register', {
     data: { phone: TEST_PHONE, password: 'test123456', name: 'E2E Test User' },
