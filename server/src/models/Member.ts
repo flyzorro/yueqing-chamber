@@ -266,6 +266,12 @@ export class MemberStore {
     return member;
   }
 
+  // 获取所有行业分类（委托给 companyStore）
+  async getIndustries(): Promise<string[]> {
+    const { companyStore } = await import('./Company');
+    return companyStore.getIndustries();
+  }
+
   // 删除会员
   async delete(id: string) {
     await prisma.member.delete({

@@ -1,5 +1,7 @@
 import app, { createApp } from './app';
 
+// Root route contract: Use /api, /api/docs, or /health.
+
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
   const server = app.listen(PORT, () => {

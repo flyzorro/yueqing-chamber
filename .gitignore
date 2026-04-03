@@ -12,6 +12,7 @@ node_modules/
 # Build outputs
 dist/
 build/
+dashboard/
 
 # IDE
 .idea/
@@ -47,3 +48,31 @@ openspec/.vector-search.db*
 .agents/
 *.prompt.md
 skills/
+.gstack/
+
+# Temporary AI files
+.omc/
+.claude/
+.ship-*
+.spectra.yaml
+.tmp_*
+clawteam-scope-*.md
+clawteam-triage-*.md
+CLAUDE.md.bak
+.claim
+claimed
+writeback_*
+progress-*.txt
+test-results/
+scripts/agent-*.cjs
+scripts/run-*.sh
+CODE_REVIEW_REPORT.md
+AGENTS.md
+HEARTBEAT.md
+IDENTITY.md
+PRD-*.md
+SOUL.md
+SPEC.md
+TOOLS.md
+USER.md
+docs/clawteam-*.md

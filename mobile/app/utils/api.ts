@@ -15,7 +15,7 @@ export const API = {
   LOGIN: `${API_BASE_URL}/api/auth/login`,
   REGISTER: `${API_BASE_URL}/api/auth/register`,
 
-  // 会员
+  // 会员 / 企业
   MEMBERS: `${API_BASE_URL}/api/members`,
 
   // 企业

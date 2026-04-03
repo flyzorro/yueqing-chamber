@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { companyStore } from '../models/Company';
 import { memberStore } from '../models/Member';
 import { authenticate } from '../middleware/auth';
 import { validateMemberCreate, validateMemberUpdate } from '../middleware/validator';
@@ -44,6 +45,29 @@ router.get('/', authenticate, async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       error: '获取会员列表失败',
+    });
+  }
+});
+
+/**
+ * GET /api/members/industries
+ * 获取所有行业分类（公开端点：供客户端筛选使用）
+ */
+router.get('/industries', async (req: Request, res: Response) => {
+  try {
+    const industries = await companyStore.getIndustries();
+
+    res.json({
+      success: true,
+      data: industries,
+      error: null,
+    });
+  } catch (error) {
+    console.error('Get industries error:', error);
+    res.status(500).json({
+      success: false,
+      data: [],
+      error: '获取行业分类失败',
     });
   }
 });

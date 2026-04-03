@@ -18,11 +18,7 @@ export function createApp() {
   app.use(express.json());
 
   app.get('/', (_req, res) => {
-    res.status(404).json({
-      success: false,
-      error: 'Not Found',
-      message: 'Use /api, /api/docs, or /health.',
-    });
+    res.json({ success: true, message: 'Yueqing Chamber API', version: '1.0.0' });
   });
 
   app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
