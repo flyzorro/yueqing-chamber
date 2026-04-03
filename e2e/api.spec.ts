@@ -1,12 +1,13 @@
 import { test, expect, request as createRequest } from '@playwright/test';
 
-// Shared auth token across tests
+// Shared auth token and API context across tests
 let authToken: string;
 const TEST_PHONE = `138${Date.now().toString().slice(-8)}`;
+let api: Awaited<ReturnType<typeof createRequest.newContext>>;
 
 test.beforeAll(async () => {
-  // Register a test user
-  const api = await createRequest.newContext({ baseURL: 'http://localhost:3000' });
+  // Register a test user — reuse global baseURL from playwright.config.ts
+  api = await createRequest.newContext();
 
   const regRes = await api.post('/api/auth/register', {
     data: { phone: TEST_PHONE, password: 'test123456', name: 'E2E Test User' },
@@ -23,6 +24,10 @@ test.beforeAll(async () => {
     const regData = await regRes.json();
     authToken = regData.data.token;
   }
+});
+
+test.afterAll(async () => {
+  await api?.dispose();
 });
 
 test.describe('Members API', () => {

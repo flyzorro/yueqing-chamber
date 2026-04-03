@@ -2,13 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
-import path from 'path';
 import routes from './routes';
 import swaggerDocument from './swagger.json';
 
 dotenv.config();
-
-const dashboardPath = path.join(__dirname, '../../dashboard');
 
 export function createApp() {
   const app = express();
@@ -21,11 +18,7 @@ export function createApp() {
   app.use(express.json());
 
   app.get('/', (_req, res) => {
-    res.sendFile(path.join(dashboardPath, 'index.html'), (err) => {
-      if (err) {
-        res.status(404).json({ success: false, error: 'Not Found', message: '/api' });
-      }
-    });
+    res.json({ success: true, message: 'Yueqing Chamber API', version: '1.0.0' });
   });
 
   app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));

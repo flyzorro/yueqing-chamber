@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { companyStore } from '../models/Company';
 import { memberStore } from '../models/Member';
 import { authenticate } from '../middleware/auth';
 import { validateMemberCreate, validateMemberUpdate } from '../middleware/validator';
@@ -50,11 +51,11 @@ router.get('/', authenticate, async (req: Request, res: Response) => {
 
 /**
  * GET /api/members/industries
- * 获取所有企业所在行业分类（从 company 字段提取）
+ * 获取所有行业分类（公开端点：供客户端筛选使用）
  */
 router.get('/industries', async (req: Request, res: Response) => {
   try {
-    const industries = await memberStore.getIndustries();
+    const industries = await companyStore.getIndustries();
 
     res.json({
       success: true,
