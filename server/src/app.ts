@@ -35,10 +35,6 @@ export function createApp() {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
-  app.use((_req, res) => {
-    res.status(404).json({ success: false, error: 'Not Found', message: 'Use /api, /api/docs, or /health.' });
-  });
-
   return app;
 }
 

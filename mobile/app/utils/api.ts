@@ -19,6 +19,9 @@ export const API = {
   MEMBERS: `${API_BASE_URL}/api/members`,
   COMPANIES: `${API_BASE_URL}/api/members`,
 
+  // 企业
+  COMPANIES: `${API_BASE_URL}/api/companies`,
+
   // 活动
   ACTIVITIES: `${API_BASE_URL}/api/activities`,
 
