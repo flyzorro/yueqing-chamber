@@ -22,6 +22,8 @@ interface Member {
   company: string;
   position?: string | null;
   status?: string | null;
+  district?: string | null;
+  chamberTitle?: string | null;
 }
 
 interface MembersResponse {
@@ -198,6 +200,8 @@ export default function MembersScreen() {
             company: item.company,
             position: item.position || '',
             status: item.status || '',
+            district: item.district || '',
+            chamberTitle: item.chamberTitle || '',
           },
         })}
         style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
@@ -213,6 +217,8 @@ export default function MembersScreen() {
           </View>
           <Text style={styles.company}>{item.company}</Text>
           {item.position ? <Text style={styles.position}>{item.position}</Text> : null}
+          {item.chamberTitle ? <Text style={styles.chamberTitle}>{item.chamberTitle}</Text> : null}
+          {item.district ? <Text style={styles.district}>片区：{item.district}</Text> : null}
         </View>
       </Pressable>
     );
@@ -450,6 +456,17 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontSize: 13,
     color: '#86909C',
+  },
+  chamberTitle: {
+    marginTop: 4,
+    fontSize: 13,
+    color: '#1677FF',
+    fontWeight: '600',
+  },
+  district: {
+    marginTop: 4,
+    fontSize: 13,
+    color: '#4E5969',
   },
   statusBadge: {
     borderRadius: 999,

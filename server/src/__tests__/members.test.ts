@@ -256,7 +256,7 @@ describe('Members API', () => {
       );
     });
 
-    it('should fall back to fixture members when prisma table is missing', async () => {
+    it('should fall back to empty result when prisma table is missing and fixtures are empty', async () => {
       const prismaError = new Error('The table public.Member does not exist') as Error & { code?: string };
       prismaError.code = 'P2021';
 
@@ -267,8 +267,8 @@ describe('Members API', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.data.length).toBeGreaterThan(0);
-      expect(response.body.data[0].name).toContain('张');
+      expect(response.body.data).toEqual([]);
+      expect(response.body.pagination.total).toBe(0);
       expect(response.body.filters).toEqual({ keyword: '张', status: 'active' });
     });
   });

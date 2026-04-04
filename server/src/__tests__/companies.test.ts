@@ -105,7 +105,7 @@ describe('Companies API', () => {
       );
     });
 
-    it('should fall back to fixture companies when prisma table is missing', async () => {
+    it('should fall back to empty result when prisma table is missing and fixtures are empty', async () => {
       const prismaError = new Error('The table public.Company does not exist') as Error & { code?: string };
       prismaError.code = 'P2021';
 
@@ -116,8 +116,8 @@ describe('Companies API', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.data.length).toBeGreaterThan(0);
-      expect(response.body.data[0].name).toContain('科技');
+      expect(response.body.data).toEqual([]);
+      expect(response.body.pagination.total).toBe(0);
       expect(response.body.filters).toEqual({ keyword: '科技', status: 'active', industry: 'all' });
     });
 
@@ -187,7 +187,7 @@ describe('CompanyStore', () => {
     );
   });
 
-  it('should use fixture data fallback when prisma company table is unavailable', async () => {
+  it('should fall back to empty result when prisma company table is unavailable and fixtures are empty', async () => {
     const prismaError = new Error('The table public.Company does not exist') as Error & { code?: string };
     prismaError.code = 'P2021';
 
@@ -196,8 +196,8 @@ describe('CompanyStore', () => {
 
     const result = await store.getPaginated({ page: 1, limit: 10, keyword: '科技', status: 'active' });
 
-    expect(result.total).toBeGreaterThan(0);
-    expect(result.data[0].name).toContain('科技');
+    expect(result.total).toBe(0);
+    expect(result.data).toEqual([]);
   });
 
   it('should return industries list from prisma', async () => {
@@ -216,7 +216,7 @@ describe('CompanyStore', () => {
     );
   });
 
-  it('should use fixture data for getIndustries when prisma unavailable', async () => {
+  it('should fall back to empty industries when prisma unavailable and fixtures are empty', async () => {
     const prismaError = new Error('The table public.Company does not exist') as Error & { code?: string };
     prismaError.code = 'P2021';
 
@@ -224,7 +224,7 @@ describe('CompanyStore', () => {
 
     const result = await store.getIndustries();
 
-    expect(result.length).toBeGreaterThan(0);
-    expect(result).toContain('信息技术');
+    // Fixtures are empty — expect empty list, not fallback fixture data
+    expect(result).toEqual([]);
   });
 });

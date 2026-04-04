@@ -10,12 +10,16 @@ export default function MemberDetailScreen() {
     company?: string;
     position?: string;
     status?: string;
+    district?: string;
+    chamberTitle?: string;
   }>();
 
   const name = typeof params.name === 'string' ? params.name : '未命名会员';
   const company = typeof params.company === 'string' ? params.company : '暂无企业信息';
   const position = typeof params.position === 'string' ? params.position : '职位待补充';
   const status = params.status === 'inactive' ? '非活跃' : '活跃';
+  const district = typeof params.district === 'string' && params.district ? params.district : null;
+  const chamberTitle = typeof params.chamberTitle === 'string' && params.chamberTitle ? params.chamberTitle : null;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -31,6 +35,18 @@ export default function MemberDetailScreen() {
           <Text style={styles.value}>{company}</Text>
           <Text style={styles.label}>职位</Text>
           <Text style={styles.value}>{position}</Text>
+          {chamberTitle ? (
+            <>
+              <Text style={styles.label}>商会职务</Text>
+              <Text style={styles.value}>{chamberTitle}</Text>
+            </>
+          ) : null}
+          {district ? (
+            <>
+              <Text style={styles.label}>片区</Text>
+              <Text style={styles.value}>{district}</Text>
+            </>
+          ) : null}
           <Text style={styles.label}>状态</Text>
           <Text style={styles.value}>{status}</Text>
         </View>

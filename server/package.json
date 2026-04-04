@@ -11,7 +11,10 @@
     "test:watch": "jest --watch",
     "lint": "eslint src --ext .ts",
     "docs": "npx swagger-ui-express serve src/swagger.json",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "seed:members": "ts-node prisma/seed_members.ts",
+    "seed:companies": "ts-node prisma/seed_companies.ts",
+    "seed": "ts-node prisma/seed_members.ts && ts-node prisma/seed_companies.ts"
   },
   "swagger": {
     "path": "/api/docs",

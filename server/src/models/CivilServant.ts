@@ -120,8 +120,8 @@ export class CivilServantStore {
       return { data, total, page, limit };
     } catch (error) {
       if (this.shouldUseFixtureFallback(error)) {
-        console.warn('[civilServants] Prisma unavailable, using fixture data for getPaginated');
-        return this.getFixtureCivilServants(filters);
+        console.warn('[civilServants] Prisma unavailable, falling back to empty result for getPaginated');
+        return { data: [], total: 0, page, limit };
       }
       throw error;
     }

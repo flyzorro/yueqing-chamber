@@ -60,10 +60,9 @@ export default function ActivitiesScreen() {
     }
 
     try {
-      const authHeaders = await getAuthHeaders();
       const response = await fetch(`${API.ACTIVITIES}/${id}/register`, {
         method: 'POST',
-        headers: authHeaders,
+        headers: headers,
       });
       const json = await response.json();
       

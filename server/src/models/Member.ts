@@ -9,6 +9,8 @@ export interface CreateMemberRequest {
   company: string;
   position?: string;
   status?: 'active' | 'inactive';
+  district?: string;
+  chamberTitle?: string;
 }
 
 export interface UpdateMemberRequest {
@@ -18,6 +20,8 @@ export interface UpdateMemberRequest {
   company?: string;
   position?: string;
   status?: 'active' | 'inactive';
+  district?: string;
+  chamberTitle?: string;
 }
 
 export interface MemberListFilters {
@@ -36,6 +40,8 @@ export interface MemberDetails {
   position: string | null;
   joindate: Date | null;
   status: string | null;
+  district: string | null;
+  chamberTitle: string | null;
   createdat: Date | null;
   updatedat: Date | null;
   recentActivities: ActivityRegistration[];
@@ -150,7 +156,7 @@ export class MemberStore {
     } catch (error) {
       if (this.shouldUseFixtureFallback(error)) {
         console.warn('[members] Prisma unavailable, using fixture data for getAll');
-        return [...memberFixtureData];
+        return memberFixtureData;
       }
       throw error;
     }
@@ -177,8 +183,8 @@ export class MemberStore {
       return { data, total, page, limit };
     } catch (error) {
       if (this.shouldUseFixtureFallback(error)) {
-        console.warn('[members] Prisma unavailable, using fixture data for getPaginated');
-        return this.getFixtureMembers(filters);
+        console.warn('[members] Prisma unavailable, falling back to empty result for getPaginated');
+        return { data: [], total: 0, page, limit };
       }
       throw error;
     }
@@ -193,8 +199,8 @@ export class MemberStore {
       return member;
     } catch (error) {
       if (this.shouldUseFixtureFallback(error)) {
-        console.warn('[members] Prisma unavailable, using fixture data for getById');
-        return this.getFixtureMemberById(id);
+        console.warn('[members] Prisma unavailable, falling back to null for getById');
+        return null;
       }
       throw error;
     }
@@ -250,8 +256,10 @@ export class MemberStore {
         phone: request.phone,
         email: request.email,
         company: request.company,
-        position: request.position,
+        position: request.position || null,
         status: request.status || 'active',
+        district: request.district === '' ? null : (request.district || null),
+        chamberTitle: request.chamberTitle === '' ? null : (request.chamberTitle || null),
       },
     });
     return member;
@@ -259,9 +267,12 @@ export class MemberStore {
 
   // 更新会员
   async update(id: string, request: UpdateMemberRequest) {
+    const data: Record<string, unknown> = { ...request };
+    if (request.district === '') data.district = null;
+    if (request.chamberTitle === '') data.chamberTitle = null;
     const member = await prisma.member.update({
       where: { id },
-      data: request,
+      data,
     });
     return member;
   }
