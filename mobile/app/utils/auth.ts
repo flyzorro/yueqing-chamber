@@ -5,6 +5,7 @@ export interface User {
   phone: string;
   name: string;
   avatar?: string;
+  company?: string;
 }
 
 const TOKEN_KEY = 'yueqing_chamber_token';

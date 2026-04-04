@@ -1,0 +1,116 @@
+{
+  "project": "yueqing-chamber app 稳定性和质量提升",
+  "goal": "提升 app 的稳定性、完整性和用户体验，确保所有功能可用",
+  "stories": [
+    {
+      "id": "US-001",
+      "priority": 1,
+      "title": "修复活动 API 鉴权缺失",
+      "description": "activities.tsx 报名接口和 activity-detail.tsx 相册接口缺少认证头",
+      "acceptanceCriteria": [
+        "activities.tsx register() 调用时携带 Authorization header",
+        "activity-detail.tsx fetchPhotos() 调用时携带 Authorization header",
+        "未登录用户点击报名时给出明确提示而非静默失败"
+      ],
+      "files": [
+        "mobile/app/(tabs)/activities.tsx",
+        "mobile/app/activity-detail.tsx"
+      ],
+      "passes": true
+    },
+    {
+      "id": "US-002",
+      "priority": 2,
+      "title": "添加会员卡片点击导航",
+      "description": "会员列表卡片无法点击进入详情页",
+      "acceptanceCriteria": [
+        "members.tsx 每个卡片可点击",
+        "点击后跳转 /member-detail 并传递 id, name, company, position, status 参数",
+        "点击区域覆盖整个卡片，有视觉反馈（opacity/pressable）"
+      ],
+      "files": [
+        "mobile/app/(tabs)/members.tsx",
+        "mobile/app/member-detail.tsx"
+      ],
+      "passes": true
+    },
+    {
+      "id": "US-003",
+      "priority": 3,
+      "title": "添加活动卡片点击导航",
+      "description": "活动列表卡片无法点击进入详情页",
+      "acceptanceCriteria": [
+        "activities.tsx 每个卡片可点击",
+        "点击后跳转 /activity-detail 并传递所有活动参数",
+        "点击区域覆盖整个卡片，有视觉反馈"
+      ],
+      "files": [
+        "mobile/app/(tabs)/activities.tsx",
+        "mobile/app/activity-detail.tsx"
+      ],
+      "passes": true
+    },
+    {
+      "id": "US-004",
+      "priority": 4,
+      "title": "修复个人中心用户信息展示",
+      "description": "profile.tsx 将 user.phone 显示在企业位置，且空 name 会导致崩溃",
+      "acceptanceCriteria": [
+        "用户企业信息正确显示（从 user.company 字段）",
+        "user.name 为空时使用默认字符（如 '用'）而非崩溃",
+        "未登录状态提示文案清晰"
+      ],
+      "files": [
+        "mobile/app/(tabs)/profile.tsx"
+      ],
+      "passes": true
+    },
+    {
+      "id": "US-005",
+      "priority": 5,
+      "title": "改进企业名单行业筛选布局",
+      "description": "行业标签使用 Wrap 会导致溢出，改为水平滚动",
+      "acceptanceCriteria": [
+        "行业筛选 chips 在水平 ScrollView 内滚动",
+        "不换行，不溢出容器",
+        "选中的 chip 样式与 members.tsx 一致"
+      ],
+      "files": [
+        "mobile/app/companies.tsx"
+      ],
+      "passes": true
+    },
+    {
+      "id": "US-006",
+      "priority": 6,
+      "title": "添加会员和活动页面标题栏",
+      "description": "members 和 activities 标签页缺少页面标题",
+      "acceptanceCriteria": [
+        "members.tsx 顶部有标题栏显示「会员中心」",
+        "activities.tsx 顶部有标题栏显示「活动管理」",
+        "标题栏样式与 services.tsx / profile.tsx 一致"
+      ],
+      "files": [
+        "mobile/app/(tabs)/members.tsx",
+        "mobile/app/(tabs)/activities.tsx"
+      ],
+      "passes": true
+    },
+    {
+      "id": "US-007",
+      "priority": 7,
+      "title": "统一所有页面错误处理",
+      "description": "部分页面缺少错误边界和加载状态",
+      "acceptanceCriteria": [
+        "activities.tsx 有错误状态 UI 和重试按钮",
+        "index.tsx 快捷入口按钮有 pressable 视觉反馈",
+        "所有 fetch 调用有 try/catch 和用户可见错误提示"
+      ],
+      "files": [
+        "mobile/app/(tabs)/activities.tsx",
+        "mobile/app/(tabs)/index.tsx"
+      ],
+      "passes": true
+    }
+  ]
+}

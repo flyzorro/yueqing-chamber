@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Pressable, ScrollView, StyleSheet, Text, View, Image, FlatList, ActivityIndicator } from 'react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { API } from './utils/api';
+import { getAuthHeaders } from './utils/auth';
 
 interface ActivityPhoto {
   id: string;
@@ -49,7 +50,8 @@ export default function ActivityDetailScreen() {
 
     setLoadingPhotos(true);
     try {
-      const response = await fetch(`${API.ACTIVITIES}/${params.id}/photos`);
+      const authHeaders = await getAuthHeaders();
+      const response = await fetch(`${API.ACTIVITIES}/${params.id}/photos`, { headers: authHeaders });
       const json = (await response.json()) as ActivityPhotosResponse;
 
       if (response.ok && json.success) {
