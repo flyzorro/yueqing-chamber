@@ -256,10 +256,10 @@ export class MemberStore {
         phone: request.phone,
         email: request.email,
         company: request.company,
-        position: request.position,
+        position: request.position || null,
         status: request.status || 'active',
-        district: request.district,
-        chamberTitle: request.chamberTitle,
+        district: request.district === '' ? null : (request.district || null),
+        chamberTitle: request.chamberTitle === '' ? null : (request.chamberTitle || null),
       },
     });
     return member;
@@ -267,9 +267,12 @@ export class MemberStore {
 
   // 更新会员
   async update(id: string, request: UpdateMemberRequest) {
+    const data: Record<string, unknown> = { ...request };
+    if (request.district === '') data.district = null;
+    if (request.chamberTitle === '') data.chamberTitle = null;
     const member = await prisma.member.update({
       where: { id },
-      data: request,
+      data,
     });
     return member;
   }

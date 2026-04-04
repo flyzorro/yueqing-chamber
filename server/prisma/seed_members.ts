@@ -23,7 +23,7 @@ async function main() {
     },
     {
       name: "胡成国",
-      phone: "13800000000",
+      phone: "138000000000",
       company: "上海德力西集团有限公司",
       position: "董事长",
       district: "",
@@ -455,7 +455,7 @@ async function main() {
     },
     {
       name: "胡慧娟",
-      phone: "13800000000",
+      phone: "138000000001",
       company: "",
       position: "",
       district: "",
@@ -1087,7 +1087,7 @@ async function main() {
     },
     {
       name: "王春竹",
-      phone: "13800000000",
+      phone: "138000000002",
       company: "上海于上机电设备有限公司",
       position: "销售经理",
       district: "",
@@ -1111,7 +1111,7 @@ async function main() {
     },
     {
       name: "陈海燕",
-      phone: "13800000000",
+      phone: "138000000003",
       company: "乐清农商银行",
       position: "",
       district: "",
@@ -1223,7 +1223,7 @@ async function main() {
     },
     {
       name: "洪伽沁",
-      phone: "13800000000",
+      phone: "138000000004",
       company: "上海希富实业发展有限公司",
       position: "",
       district: "",
@@ -1287,7 +1287,7 @@ async function main() {
     },
     {
       name: "王一一",
-      phone: "13800000000",
+      phone: "138000000005",
       company: "",
       position: "",
       district: "",
@@ -1295,7 +1295,7 @@ async function main() {
     },
     {
       name: "徐传勇",
-      phone: "13800000000",
+      phone: "138000000006",
       company: "",
       position: "",
       district: "",
@@ -1303,7 +1303,7 @@ async function main() {
     },
     {
       name: "王思龙",
-      phone: "13800000000",
+      phone: "138000000007",
       company: "",
       position: "",
       district: "",
@@ -1601,5 +1601,5 @@ async function main() {
 }
 
 main()
-  .catch((e) => { console.error(e); process.exit(1); })
-  .finally(async () => { await prisma.$disconnect(); });
+  .catch((e) => {{ console.error(e); process.exit(1); }})
+  .finally(async () => {{ await prisma.$disconnect(); }});
