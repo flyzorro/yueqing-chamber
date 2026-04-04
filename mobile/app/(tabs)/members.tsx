@@ -189,18 +189,32 @@ export default function MembersScreen() {
     const isActive = item.status !== 'inactive';
 
     return (
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.name}>{item.name}</Text>
-          <View style={[styles.statusBadge, isActive ? styles.activeBadge : styles.inactiveBadge]}>
-            <Text style={[styles.statusText, isActive ? styles.activeText : styles.inactiveText]}>
-              {isActive ? '活跃' : '非活跃'}
-            </Text>
+      <Pressable
+        onPress={() => router.push({
+          pathname: '/member-detail',
+          params: {
+            id: item.id,
+            name: item.name,
+            company: item.company,
+            position: item.position || '',
+            status: item.status || '',
+          },
+        })}
+        style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+      >
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.name}>{item.name}</Text>
+            <View style={[styles.statusBadge, isActive ? styles.activeBadge : styles.inactiveBadge]}>
+              <Text style={[styles.statusText, isActive ? styles.activeText : styles.inactiveText]}>
+                {isActive ? '活跃' : '非活跃'}
+              </Text>
+            </View>
           </View>
+          <Text style={styles.company}>{item.company}</Text>
+          {item.position ? <Text style={styles.position}>{item.position}</Text> : null}
         </View>
-        <Text style={styles.company}>{item.company}</Text>
-        {item.position ? <Text style={styles.position}>{item.position}</Text> : null}
-      </View>
+      </Pressable>
     );
   };
 
@@ -247,6 +261,9 @@ export default function MembersScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>会员中心</Text>
+      </View>
       <View style={styles.toolbar}>
         <TextInput
           value={keywordInput}
@@ -311,6 +328,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F7FA',
+  },
+  header: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1F2329',
   },
   toolbar: {
     flexDirection: 'row',

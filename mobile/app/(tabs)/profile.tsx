@@ -71,10 +71,10 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{user.name.charAt(0)}</Text>
+          <Text style={styles.avatarText}>{user.name ? user.name.charAt(0) : '我'}</Text>
         </View>
         <Text style={styles.name}>{user.name}</Text>
-        <Text style={styles.company}>{user.phone}</Text>
+        <Text style={styles.company}>{user.company || user.phone || ''}</Text>
       </View>
 
       <View style={styles.menu}>

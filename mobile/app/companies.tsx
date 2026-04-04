@@ -4,6 +4,7 @@ import {
   FlatList,
   Pressable,
   RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -212,10 +213,14 @@ export default function CompaniesScreen() {
   ));
 
   const renderFilters = () => (
-    <View style={styles.filtersContent}>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.filtersContent}
+    >
       {allFilterItem}
       {industryFilterItems}
-    </View>
+    </ScrollView>
   );
 
   return (
@@ -270,13 +275,12 @@ const styles = StyleSheet.create({
     color: '#4E5969',
   },
   filtersContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 12,
+    paddingVertical: 12,
   },
   filtersContent: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: 8,
+    paddingHorizontal: 16,
   },
   filterChip: {
     paddingHorizontal: 14,
@@ -285,7 +289,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E5E6EB',
-    marginRight: 8,
   },
   filterChipSelected: {
     backgroundColor: '#E8F3FF',
