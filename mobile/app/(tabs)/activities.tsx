@@ -32,7 +32,7 @@ export default function ActivitiesScreen() {
           ...item,
           uniqueId: `${item.id}_${currentPage}_${index}`
         }));
-        setActivities(refresh ? newActivities : [...activities, ...newActivities]);
+        setActivities(refresh ? newActivities : (prev) => [...prev, ...newActivities]);
         setHasMore(json.data.length === 10);
       }
     } catch (error) {
