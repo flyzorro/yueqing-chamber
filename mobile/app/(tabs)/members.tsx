@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { API } from '../utils/api';
-import { isLoggedIn } from '../utils/auth';
+import { getAuthHeaders, isLoggedIn } from '../utils/auth';
 
 type MemberStatus = 'all' | 'active' | 'inactive';
 
@@ -122,7 +122,8 @@ export default function MembersScreen() {
           params.set('status', status);
         }
 
-        const response = await fetch(`${API.MEMBERS}?${params.toString()}`);
+        const authHeaders = await getAuthHeaders();
+        const response = await fetch(`${API.MEMBERS}?${params.toString()}`, { headers: authHeaders });
 
         // Handle 401 Unauthorized
         if (response.status === 401) {
