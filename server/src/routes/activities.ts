@@ -9,6 +9,19 @@ const router = Router();
  * GET /api/activities
  * 获取活动列表（分页）
  */
+/**
+ * Transform snake_case activity fields to camelCase for API responses
+ */
+function transformActivity(activity: any) {
+  return {
+    ...activity,
+    currentParticipants: activity.currentparticipants,
+    maxParticipants: activity.maxparticipants,
+    createdAt: activity.createdat,
+    updatedAt: activity.updatedat,
+  };
+}
+
 router.get('/', async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
@@ -18,7 +31,7 @@ router.get('/', async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      data: result.data,
+      data: result.data.map(transformActivity),
       pagination: {
         total: result.total,
         page: result.page,
@@ -28,9 +41,9 @@ router.get('/', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Get activities error:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: '获取活动列表失败' 
+    res.status(500).json({
+      success: false,
+      error: '获取活动列表失败'
     });
   }
 });
@@ -42,18 +55,18 @@ router.get('/', async (req: Request, res: Response) => {
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const activity = await activityStore.getById(req.params.id);
-    
+
     if (!activity) {
-      res.status(404).json({ 
-        success: false, 
-        error: '活动不存在' 
+      res.status(404).json({
+        success: false,
+        error: '活动不存在'
       });
       return;
     }
 
     res.json({
       success: true,
-      data: activity
+      data: transformActivity(activity)
     });
   } catch (error) {
     console.error('Get activity error:', error);
@@ -74,7 +87,7 @@ router.post('/', validateActivityCreate, async (req: Request, res: Response) => 
 
     res.status(201).json({
       success: true,
-      data: activity
+      data: transformActivity(activity)
     });
   } catch (error) {
     console.error('Create activity error:', error);
@@ -92,18 +105,18 @@ router.post('/', validateActivityCreate, async (req: Request, res: Response) => 
 router.put('/:id', validateActivityUpdate, async (req: Request, res: Response) => {
   try {
     const activity = await activityStore.update(req.params.id, req.body);
-    
+
     if (!activity) {
-      res.status(404).json({ 
-        success: false, 
-        error: '活动不存在' 
+      res.status(404).json({
+        success: false,
+        error: '活动不存在'
       });
       return;
     }
 
     res.json({
       success: true,
-      data: activity
+      data: transformActivity(activity)
     });
   } catch (error) {
     console.error('Update activity error:', error);
