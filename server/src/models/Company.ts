@@ -126,8 +126,8 @@ export class CompanyStore {
       return { data, total, page, limit };
     } catch (error) {
       if (this.shouldUseFixtureFallback(error)) {
-        console.warn('[companies] Prisma unavailable, using fixture data for getPaginated');
-        return this.getFixtureCompanies(filters);
+        console.warn('[companies] Prisma unavailable, falling back to empty result for getPaginated');
+        return { data: [], total: 0, page, limit };
       }
       throw error;
     }
@@ -146,10 +146,8 @@ export class CompanyStore {
       return result.map((c) => c.industry!).filter(Boolean);
     } catch (error) {
       if (this.shouldUseFixtureFallback(error)) {
-        const industries = Array.from(
-          new Set(companyFixtureData.map((c) => c.industry).filter((i): i is string => Boolean(i)))
-        ).sort();
-        return industries;
+        console.warn('[companies] Prisma unavailable, falling back to empty industries list');
+        return [];
       }
       throw error;
     }

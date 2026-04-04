@@ -52,7 +52,7 @@ export class ActivityPhotoStore {
   private getFixturePhotos(activityId: string): ActivityPhotoItem[] {
     return activityPhotoFixtureData
       .filter((photo) => photo.activityId === activityId)
-      .sort((a, b) => a.sortorder - b.sortorder)
+      .sort((a, b) => (a.sortorder ?? 0) - (b.sortorder ?? 0))
       .map((photo) => ({
         ...photo,
         caption: photo.caption,
@@ -69,8 +69,8 @@ export class ActivityPhotoStore {
       return photos;
     } catch (error) {
       if (this.shouldUseFixtureFallback(error)) {
-        console.warn('[activityPhotos] Prisma unavailable, using fixture data');
-        return this.getFixturePhotos(activityId);
+        console.warn('[activityPhotos] Prisma unavailable, falling back to empty photos list');
+        return [];
       }
       console.error('Get activity photos error:', error);
       return [];

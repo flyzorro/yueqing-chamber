@@ -26,6 +26,8 @@ model Member {
   position      String?        @db.VarChar
   joindate      DateTime?      @default(now()) @db.Timestamp(6)
   status        String?        @default("active") @db.VarChar
+  district      String?        @db.VarChar
+  chamberTitle  String?        @db.VarChar
   createdat     DateTime?      @default(now()) @db.Timestamp(6)
   updatedat     DateTime?      @default(now()) @db.Timestamp(6)
 
@@ -37,7 +39,7 @@ model Member {
 
 model Company {
   id          String    @id @default(cuid()) @db.VarChar
-  name        String    @db.VarChar
+  name        String    @unique @db.VarChar
   industry    String?   @db.VarChar
   contactName String?   @db.VarChar
   phone       String?   @db.VarChar
