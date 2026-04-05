@@ -22,3 +22,4 @@ yarn-error.*
 coverage/
 /src/generated/prisma
 .vercel
+server/.expo/
