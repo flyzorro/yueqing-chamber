@@ -1,9 +1,9 @@
 /**
  * Company Auto-Fill Service
- *
- * Searches for company websites via DuckDuckGo HTML and scrapes content
+ * @fileOverview Searches for company websites via DuckDuckGo HTML and scrapes content
  * to generate Block[] JSON for Company.summary.
  */
+/* global document */
 
 type Block =
   | { type: 'heading'; level: 1 | 2 | 3; text: string }
