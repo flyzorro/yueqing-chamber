@@ -5,7 +5,7 @@ const { Client } = pg;
 
 const NGROK_URL = 'https://hisako-huskiest-jacquelyn.ngrok-free.dev';
 
-async function fetchNgrok(path) {
+async function fetchNgrok(path: string) {
   const resp = await fetch(NGROK_URL + path);
   if (!resp.ok) throw new Error(`Ngrok error ${resp.status} on ${path}`);
   return resp.json();
@@ -41,10 +41,10 @@ async function migrateCompanies() {
         [company.id, company.name, company.industry || null, company.contactName,
          company.phone || null, company.address || null, company.logo || null, company.status || 'active']
       );
-      if (res.rowCount > 0) { console.log('  ✓', company.name); inserted++; }
+      if ((res.rowCount ?? 0) > 0) { console.log('  ✓', company.name); inserted++; }
       else { skipped++; }
     } catch (e) {
-      console.log('  ✗', company.name, '-', e.message);
+      console.log('  ✗', company.name, '-', (e as Error).message);
       failed++;
     }
   }
