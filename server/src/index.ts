@@ -60,7 +60,7 @@ if (require.main === module) {
 
   migrateCompanies().catch(e => console.error('Migration error:', e)).finally(() => {
     const server = app.listen(PORT, () => {
-      console.log(`\urocket 服务器运行在 http://localhost:${PORT}`);
+      console.log('🚀 服务器运行在 http://localhost:' + PORT);
     });
 
     process.on('SIGTERM', () => {
