@@ -1,13 +1,21 @@
 /**
- * Batch fill company summaries via Ollama (local) + Railway API.
- * Run: RAILWAY_URL=https://xxx.railway.app RAILWAY_TOKEN=xxx node scripts/batch-fill.js
+ * Batch fill company summaries via Bocha web search + Railway API.
+ * Run: BOCHA_API_KEY=xxx RAILWAY_URL=https://xxx.railway.app RAILWAY_TOKEN=xxx node scripts/batch-fill.js
  */
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
-const OLLAMA_URL = 'http://localhost:11434/api/generate';
 
 const RAILWAY_URL = process.env.RAILWAY_URL || 'http://localhost:3000';
 const RAILWAY_TOKEN = process.env.RAILWAY_TOKEN || '';
+const BOCHA_API_KEY = process.env.BOCHA_API_KEY || '';
+const BOCHA_BASE_URL = 'https://api.bochaai.com';
+
+async function fetchBocha(query) {
+  const resp = await fetch(BOCHA_BASE_URL + '/v1/web-search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + BOCHA_API_KEY },
+    body: JSON.stringify({ query, count: 5, summary: true }),
+  });
+  return resp.json();
+}
 
 async function fetchRailway(path, options) {
   const url = RAILWAY_URL + path;
@@ -18,29 +26,30 @@ async function fetchRailway(path, options) {
   return resp.json();
 }
 
-async function generateDescription(name, industry) {
-  const industryHint = industry && industry.trim() ? '行业：' + industry.trim() + '。' : '';
-  const prompt = '请详细介绍公司"' + name + '"，包括成立时间、主营业务、产品类型、企业规模、核心优势等，写150字以内。' + industryHint + '直接输出介绍文字，不要前缀，不要markdown格式。';
+async function generateDescription(name) {
+  const result = await fetchBocha(name);
 
-  const resp = await fetch(OLLAMA_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'qwen2.5:7b',
-      prompt: prompt,
-      stream: false,
-      options: { temperature: 0.3, num_predict: 400 }
-    })
-  });
+  if (!result.data?.webPages?.value?.length) {
+    throw new Error('No results');
+  }
 
-  if (!resp.ok) throw new Error('Ollama error ' + resp.status);
+  // Collect snippets from top results
+  const snippets = result.data.webPages.value
+    .map(r => r.snippet)
+    .filter(Boolean)
+    .join('\n\n');
 
-  const data = await resp.json();
-  let text = (data.response || '').trim();
-  text = text.replace(/^['"【\[（(].*?[\]】）"']+\s*/, '').replace(/^##?\s*/, '').replace(/\*\*/g, '');
-  if (text.length < 10) throw new Error('Empty');
+  if (snippets.length < 20) {
+    throw new Error('Empty');
+  }
 
-  return text.slice(0, 300);
+  // Clean up HTML artifacts and trim
+  const cleaned = snippets
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return cleaned.slice(0, 500);
 }
 
 async function writeSummary(companyId, description) {
@@ -51,6 +60,11 @@ async function writeSummary(companyId, description) {
 }
 
 async function main() {
+  if (!BOCHA_API_KEY) {
+    console.error('BOCHA_API_KEY environment variable is required');
+    process.exit(1);
+  }
+
   // Fetch all companies from Railway
   const allCompanies = [];
   let page = 1;
@@ -72,20 +86,19 @@ async function main() {
     process.stdout.write('[' + (i + 1) + '/' + companies.length + '] ' + company.name + '... ');
 
     try {
-      const description = await generateDescription(company.name, company.industry);
+      const description = await generateDescription(company.name);
       await writeSummary(company.id, description);
-      console.log('\u2705 (' + description.length + ' chars) ' + description.slice(0, 30));
+      console.log('\u2705 (' + description.length + ' chars) ' + description.slice(0, 50) + '...');
       filled++;
     } catch (e) {
       if (e.message.indexOf('Empty') !== -1) { console.log('\u23ed empty'); skipped++; }
       else { console.log('\u274c ' + e.message.slice(0, 80)); failed++; }
     }
 
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 500));
   }
 
   console.log('\nDone: ' + filled + ' filled, ' + skipped + ' empty, ' + failed + ' failed');
-  await prisma.$disconnect();
 }
 
 main().catch(console.error);
