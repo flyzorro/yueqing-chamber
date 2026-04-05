@@ -99,12 +99,13 @@ jobs:
       - name: Install Playwright
         run: npx playwright install --with-deps chromium
 
-      - name: Start server
+      - name: Start server (build first)
         working-directory: server
-        run: npm run dev &
-        
-      - name: Wait for server
-        run: sleep 5
+        run: |
+          npx prisma generate
+          npx tsc
+          node dist/index.js &
+          sleep 5
 
       - name: Run E2E tests
         run: npx playwright test --project=chromium
