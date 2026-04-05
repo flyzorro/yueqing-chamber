@@ -1,7 +1,6 @@
 import request from 'supertest';
 import express from 'express';
 import companiesRouter from '../routes/companies';
-import membersRouter from '../routes/members';
 import prisma from '../lib/prisma';
 import { CompanyStore } from '../models/Company';
 
@@ -34,7 +33,6 @@ jest.mock('../lib/prisma', () => ({
 const app = express();
 app.use(express.json());
 app.use('/api/companies', companiesRouter);
-app.use('/api/members', membersRouter);
 
 describe('Companies API', () => {
   beforeEach(() => {
@@ -134,6 +132,101 @@ describe('Companies API', () => {
       expect(response.status).toBe(500);
       expect(response.body.success).toBe(false);
       expect(response.body.error).toBe('获取企业列表失败');
+    });
+  });
+
+  describe('GET /api/companies/:id', () => {
+    const baseMockCompany = {
+      id: 'company-detail-1',
+      name: '月清科技',
+      industry: '科技服务',
+      contactName: '张恺毅',
+      phone: '13800139001',
+      address: '乐清市总部经济园',
+      logo: null,
+      status: 'active',
+      createdat: new Date(),
+      updatedat: new Date(),
+    };
+
+    it('should parse valid JSON Block array in summary', async () => {
+      (prisma.company.findUnique as jest.Mock).mockResolvedValue({
+        ...baseMockCompany,
+        summary: '[{"type":"paragraph","text":"hello"}]',
+      });
+
+      const response = await request(app).get('/api/companies/company-detail-1');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.summary).toEqual([{ type: 'paragraph', text: 'hello' }]);
+    });
+
+    it('should return null for null summary', async () => {
+      (prisma.company.findUnique as jest.Mock).mockResolvedValue({
+        ...baseMockCompany,
+        summary: null,
+      });
+
+      const response = await request(app).get('/api/companies/company-detail-1');
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.summary).toBeNull();
+    });
+
+    it('should return null for empty string summary', async () => {
+      (prisma.company.findUnique as jest.Mock).mockResolvedValue({
+        ...baseMockCompany,
+        summary: '',
+      });
+
+      const response = await request(app).get('/api/companies/company-detail-1');
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.summary).toBeNull();
+    });
+
+    it('should return null for malformed JSON', async () => {
+      (prisma.company.findUnique as jest.Mock).mockResolvedValue({
+        ...baseMockCompany,
+        summary: '{not json}',
+      });
+
+      const response = await request(app).get('/api/companies/company-detail-1');
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.summary).toBeNull();
+    });
+
+    it('should convert legacy plain text summary to paragraph block', async () => {
+      (prisma.company.findUnique as jest.Mock).mockResolvedValue({
+        ...baseMockCompany,
+        summary: '这是旧企业介绍',
+      });
+
+      const response = await request(app).get('/api/companies/company-detail-1');
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.summary).toEqual([{ type: 'paragraph', text: '这是旧企业介绍' }]);
+    });
+
+    it('should return 404 when company not found', async () => {
+      (prisma.company.findUnique as jest.Mock).mockResolvedValue(null);
+
+      const response = await request(app).get('/api/companies/nonexistent');
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+    });
+
+    it('should return 500 on database error', async () => {
+      (prisma.company.findUnique as jest.Mock).mockRejectedValue(new Error('Database error'));
+
+      const response = await request(app).get('/api/companies/company-detail-1');
+
+      expect(response.status).toBe(500);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error).toBe('获取企业详情失败');
     });
   });
 

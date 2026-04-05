@@ -2,6 +2,14 @@ import { Router, Request, Response } from 'express';
 import { companyStore } from '../models/Company';
 import { companyProductStore } from '../models/CompanyProduct';
 
+type Block =
+  | { type: 'heading'; level: 1 | 2 | 3; text: string }
+  | { type: 'paragraph'; text: string }
+  | { type: 'image'; url: string; caption?: string }
+  | { type: 'video'; url: string; poster?: string }
+  | { type: 'gallery'; images: { url: string; caption?: string }[] }
+  | { type: 'divider' };
+
 const router = Router();
 const VALID_COMPANY_STATUS = new Set(['active', 'inactive']);
 
@@ -54,6 +62,27 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
+function parseSummary(raw: string | null | undefined): Block[] | null {
+  if (!raw || typeof raw !== 'string' || !raw.trim()) {
+    return null;
+  }
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      return parsed as Block[];
+    }
+    // Legacy plain text — wrap in paragraph block
+    return [{ type: 'paragraph', text: raw.trim() }];
+  } catch {
+    // Malformed JSON (looks like JSON but failed to parse) — return null
+    if (raw.trim().startsWith('{') || raw.trim().startsWith('[')) {
+      return null;
+    }
+    // Non-JSON plain text — wrap in paragraph block
+    return [{ type: 'paragraph', text: raw.trim() }];
+  }
+}
+
 function mapCompanyFields(company: Record<string, unknown>) {
   return {
     id: company.id,
@@ -61,7 +90,7 @@ function mapCompanyFields(company: Record<string, unknown>) {
     industry: company.industry || null,
     contactName: company.contactName || null,
     contactPhone: company.phone || null,
-    summary: company.summary || null,
+    summary: parseSummary(company.summary as string | null | undefined),
     address: company.address || null,
     status: company.status,
     createdAt: company.createdat,
