@@ -186,7 +186,7 @@ export default function CompanyDetailScreen() {
                 </View>
               </View>
             )}
-            ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+            ItemSeparatorComponent={ProductSeparator}
           />
         );
 
@@ -444,3 +444,5 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 });
+
+const ProductSeparator = () => <View style={{ height: 12 }} />;
