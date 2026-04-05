@@ -165,14 +165,34 @@ export class CompanyStore {
     }
   }
 
+  async create(data: { name: string; industry?: string }): Promise<Record<string, unknown>> {
+    return prisma.company.create({
+      data: {
+        name: data.name,
+        industry: data.industry,
+        status: 'active',
+      },
+    });
+  }
+
+  async updateSummary(id: string, summary: object[]): Promise<void> {
+    try {
+      await prisma.company.update({
+        where: { id },
+        data: { summary: JSON.stringify(summary) },
+      });
+    } catch (error) {
+      console.error('[companyStore] updateSummary error:', error);
+      throw error;
+    }
+  }
+
   async getIndustries(): Promise<string[]> {
     try {
       const result = await prisma.company.findMany({
         select: { industry: true },
         distinct: ['industry'],
-        where: {
-          industry: { not: null },
-        },
+        where: { industry: { not: null } },
         orderBy: { industry: 'asc' },
       });
       return result.map((c) => c.industry!).filter(Boolean);

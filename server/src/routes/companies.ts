@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { companyStore } from '../models/Company';
 import { companyProductStore } from '../models/CompanyProduct';
+import { enqueueCompanyFill } from '../services/companyFillQueue';
 
 type Block =
   | { type: 'heading'; level: 1 | 2 | 3; text: string }
@@ -189,6 +190,43 @@ router.get('/:id', async (req: Request, res: Response) => {
       data: null,
       error: '获取企业详情失败',
     });
+  }
+});
+
+/**
+ * POST /api/companies/auto-fill
+ * Create a company and trigger async auto-fill of its summary.
+ */
+router.post('/auto-fill', async (req: Request, res: Response) => {
+  try {
+    const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
+    if (!name) {
+      res.status(400).json({ success: false, data: null, error: '企业名称不能为空' });
+      return;
+    }
+
+    const industry =
+      typeof req.body.industry === 'string' ? req.body.industry.trim() : undefined;
+
+    const company = await companyStore.create({ name, industry }) as { id: string; name: string; industry: string | null };
+
+    // Enqueue for background auto-fill (non-blocking)
+    enqueueCompanyFill({ companyId: company.id, name, industry, attempt: 1 });
+
+    res.json({
+      success: true,
+      data: {
+        id: company.id,
+        name: company.name,
+        industry: company.industry || null,
+        summary: null,
+        status: 'pending',
+      },
+      error: null,
+    });
+  } catch (error) {
+    console.error('Auto-fill error:', error);
+    res.status(500).json({ success: false, data: null, error: '创建企业失败' });
   }
 });
 
