@@ -154,8 +154,8 @@ describe('Companies API', () => {
 
     it('should return product list for existing company', async () => {
       const mockProducts = [
-        { id: 'p1', companyId: 'company-1', name: '产品A', description: '描述A', imageUrl: null, sortOrder: 0, createdat: new Date(), updatedat: new Date() },
-        { id: 'p2', companyId: 'company-1', name: '产品B', description: '描述B', imageUrl: 'https://x.com/b.jpg', sortOrder: 1, createdat: new Date(), updatedat: new Date() },
+        { id: 'p1', companyId: 'company-1', seedKey: 'product-a', name: '产品A', description: '描述A', imageUrl: null, sortOrder: 0, createdat: new Date(), updatedat: new Date() },
+        { id: 'p2', companyId: 'company-1', seedKey: 'product-b', name: '产品B', description: '描述B', imageUrl: 'https://x.com/b.jpg', sortOrder: 1, createdat: new Date(), updatedat: new Date() },
       ];
 
       (prisma.company.findUnique as jest.Mock).mockResolvedValue(mockCompany);

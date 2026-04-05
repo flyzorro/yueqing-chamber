@@ -133,6 +133,38 @@ export class CompanyStore {
     }
   }
 
+  async getById(id: string) {
+    try {
+      const company = await prisma.company.findUnique({ where: { id } });
+
+      if (!company) return null;
+
+      // 如果企业没有联系人信息，从同名会员里取
+      if (!company.contactName || !company.phone) {
+        const member = await prisma.member.findFirst({
+          where: { company: company.name },
+          orderBy: { joindate: 'asc' },
+          select: { name: true, phone: true },
+        });
+
+        if (member) {
+          return {
+            ...company,
+            contactName: company.contactName || member.name,
+            phone: company.phone || member.phone,
+          };
+        }
+      }
+
+      return company;
+    } catch (error) {
+      if (this.shouldUseFixtureFallback(error)) {
+        return companyFixtureData.find((c) => c.id === id) || null;
+      }
+      throw error;
+    }
+  }
+
   async getIndustries(): Promise<string[]> {
     try {
       const result = await prisma.company.findMany({

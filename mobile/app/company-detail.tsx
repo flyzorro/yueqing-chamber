@@ -60,6 +60,7 @@ export default function CompanyDetailScreen() {
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsError, setProductsError] = useState('');
+  const [hasFetchedProducts, setHasFetchedProducts] = useState(false);
 
   // Fetch company data
   useEffect(() => {
@@ -91,7 +92,8 @@ export default function CompanyDetailScreen() {
 
   // Fetch products when tab switches to 产品介绍
   const fetchProducts = useCallback(async () => {
-    if (!id) return;
+    if (!id || hasFetchedProducts) return;
+    setHasFetchedProducts(true);
     setProductsLoading(true);
     setProductsError('');
     try {
@@ -109,13 +111,19 @@ export default function CompanyDetailScreen() {
     } finally {
       setProductsLoading(false);
     }
-  }, [id]);
+  }, [id, hasFetchedProducts]);
 
   useEffect(() => {
     if (selectedIndex === 1) {
       fetchProducts();
     }
   }, [selectedIndex, fetchProducts]);
+
+  const handleRetry = () => {
+    setHasFetchedProducts(false);
+    setProducts([]);
+    fetchProducts();
+  };
 
   const handleSegmentPress = (index: number) => {
     Animated.spring(indicatorAnim, {
@@ -153,7 +161,7 @@ export default function CompanyDetailScreen() {
           return (
             <View style={styles.centerContent}>
               <Text style={styles.errorText}>{productsError}</Text>
-              <Pressable style={styles.retryButton} onPress={fetchProducts}>
+              <Pressable style={styles.retryButton} onPress={handleRetry}>
                 <Text style={styles.retryButtonText}>重试</Text>
               </Pressable>
             </View>

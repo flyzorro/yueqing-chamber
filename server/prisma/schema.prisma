@@ -60,16 +60,18 @@ model Company {
 model CompanyProduct {
   id          String    @id @default(cuid()) @db.VarChar
   companyId   String    @db.VarChar
+  seedKey     String    @default("")
   name        String    @db.VarChar
   description String?   @db.VarChar
   imageUrl    String?   @db.VarChar
-  sortOrder   Int?      @default(0)
+  sortOrder   Int       @default(0)
   createdat   DateTime? @default(now()) @db.Timestamp(6)
   updatedat   DateTime? @default(now()) @db.Timestamp(6)
 
   company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  @@index([companyId])
+  @@unique([companyId, seedKey])
+  @@index([companyId, sortOrder, createdat])
 }
 
 model CivilServant {

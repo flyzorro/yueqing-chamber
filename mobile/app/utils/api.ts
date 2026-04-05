@@ -47,16 +47,17 @@ export const fetchApi = async (url: string, options: RequestInit = {}) => {
     headers,
   });
 
-  // DEBUG: 打印响应状态和内容
-  console.log(`[API DEBUG] ${fullUrl} -> status=${response.status}, ok=${response.ok}`);
+  // DEBUG: only log in development, never log response bodies
+  if (__DEV__) {
+    console.log(`[API DEBUG] ${fullUrl} -> status=${response.status}, ok=${response.ok}`);
+  }
   const text = await response.text();
-  console.log(`[API DEBUG] response body: ${text.substring(0, 300)}`);
 
   let data;
   try {
     data = JSON.parse(text);
-  } catch (e) {
-    throw new Error(`JSON parse error: ${text.substring(0, 100)}`);
+  } catch {
+    throw new Error('Invalid JSON response from server');
   }
 
   if (!response.ok) {

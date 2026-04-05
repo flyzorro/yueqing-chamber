@@ -17,6 +17,12 @@ export function createApp() {
   app.use(cors());
   app.use(express.json());
 
+  // DEBUG: 记录所有请求
+  app.use((req, _res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`, req.body);
+    next();
+  });
+
   app.get('/', (_req, res) => {
     res.json({ success: true, message: 'Yueqing Chamber API', version: '1.0.0' });
   });
