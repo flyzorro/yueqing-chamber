@@ -936,8 +936,71 @@ async function main() {
   }
 
   console.log(`Seeded ${companies.length} companies.`);
+
+  // Seed products for the first 3 companies
+  // seedKey is stable — used as upsert identity so renaming a product
+  // updates the existing record instead of creating a duplicate.
+  const productSeeds = [
+    {
+      companyName: '立帮秀珀化工涂料有限公司',
+      products: [
+        { seedKey: 'floor-coating', name: '高性能地坪涂料', description: '适用于工业厂房、地下车库等场景，耐磨抗压', sortOrder: 0 },
+        { seedKey: 'anti-corrosion', name: '环保防腐涂装系统', description: '水性环保配方，耐化学品腐蚀，适用于化工厂房', sortOrder: 1 },
+      ],
+    },
+    {
+      companyName: '浙江天正电气股份有限公司',
+      products: [
+        { seedKey: 'power-cabinet', name: '智能配电柜', description: '数字化配电管理，支持远程监控和能耗分析', sortOrder: 0 },
+        { seedKey: 'circuit-breaker', name: '小型断路器', description: '家用及工业用电路保护元件，分断能力强', sortOrder: 1 },
+      ],
+    },
+    {
+      companyName: '电光防爆科技股份有限公司',
+      products: [
+        { seedKey: 'monitoring-system', name: '矿用防爆监控系统', description: '煤矿井下视频监控与安全预警系统', sortOrder: 0 },
+        { seedKey: 'comm-device', name: '井下通信设备', description: '矿用本安型通信终端，支持语音和数据传输', sortOrder: 1 },
+      ],
+    },
+  ];
+
+  for (const seed of productSeeds) {
+    const company = await prisma.company.findUnique({ where: { name: seed.companyName } });
+    if (!company) {
+      console.warn(`Company not found: ${seed.companyName}, skipping products`);
+      continue;
+    }
+    for (const product of seed.products) {
+      // Backfill seedKey for rows seeded before the seedKey column existed
+      await prisma.companyProduct.updateMany({
+        where: { companyId: company.id, name: product.name, seedKey: '' },
+        data: { seedKey: product.seedKey },
+      });
+      // Upsert using the compound unique key
+      const existing = await prisma.companyProduct.findFirst({
+        where: { companyId: company.id, seedKey: product.seedKey },
+      });
+      if (existing) {
+        await prisma.companyProduct.update({
+          where: { id: existing.id },
+          data: { name: product.name, description: product.description, sortOrder: product.sortOrder },
+        });
+      } else {
+        await prisma.companyProduct.create({
+          data: {
+            companyId: company.id,
+            seedKey: product.seedKey,
+            name: product.name,
+            description: product.description,
+            sortOrder: product.sortOrder,
+          },
+        });
+      }
+    }
+    console.log(`Seeded ${seed.products.length} products for ${seed.companyName}`);
+  }
 }
 
 main()
-  .catch((e) => {{ console.error(e); process.exit(1); }})
-  .finally(async () => {{ await prisma.$disconnect(); }});
+  .catch((e) => { console.error(e); process.exit(1); })
+  .finally(async () => { await prisma.$disconnect(); });

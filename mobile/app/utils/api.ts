@@ -20,6 +20,7 @@ export const API = {
 
   // 企业
   COMPANIES: `${API_BASE_URL}/api/companies`,
+  COMPANY_PRODUCTS: (id: string) => `${API_BASE_URL}/api/companies/${id}/products`,
 
   // 活动
   ACTIVITIES: `${API_BASE_URL}/api/activities`,
@@ -46,10 +47,21 @@ export const fetchApi = async (url: string, options: RequestInit = {}) => {
     headers,
   });
 
-  const data = await response.json();
+  // DEBUG: only log in development, never log response bodies
+  if (__DEV__) {
+    console.log(`[API DEBUG] ${fullUrl} -> status=${response.status}, ok=${response.ok}`);
+  }
+  const text = await response.text();
+
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error('Invalid JSON response from server');
+  }
 
   if (!response.ok) {
-    throw new Error(data.message || '请求失败');
+    throw new Error(data.error || data.message || `请求失败 (${response.status})`);
   }
 
   return data;

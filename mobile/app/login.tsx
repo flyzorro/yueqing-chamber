@@ -46,6 +46,9 @@ export default function LoginScreen() {
         body: JSON.stringify(body)
       });
 
+      // DEBUG: 打印响应内容
+      console.log('Auth success:', JSON.stringify(json));
+
       // 保存 Token 和用户信息（使用与 auth.ts 一致的 key）
       await AsyncStorage.setItem('yueqing_chamber_token', json.data.token);
       await AsyncStorage.setItem('yueqing_chamber_user', JSON.stringify(json.data.user));
@@ -55,6 +58,14 @@ export default function LoginScreen() {
       ]);
     } catch (error) {
       console.error('Auth error:', error);
+      // DEBUG: 打印错误详情
+      if (error instanceof Error && error.message === '请求失败') {
+        // 尝试获取响应体内容
+        try {
+          const token = await AsyncStorage.getItem('yueqing_chamber_token');
+          console.log('Token after error:', token);
+        } catch(e) {}
+      }
       Alert.alert('错误', error instanceof Error ? error.message : '网络错误，请稍后重试');
     } finally {
       setLoading(false);
