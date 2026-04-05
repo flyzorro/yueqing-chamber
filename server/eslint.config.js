@@ -13,6 +13,7 @@ export default [
         ecmaVersion: 2020,
         sourceType: 'module',
         project: './tsconfig.json',
+        isolatedModules: true,
       },
       globals: {
         ...globals.node,

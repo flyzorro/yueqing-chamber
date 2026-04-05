@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import prisma from '../lib/prisma';
 import { companyFixtureData } from '../data/companyFixture';
 
@@ -61,19 +61,18 @@ export class CompanyStore {
       return error.code === 'P2021';
     }
 
-    if (error instanceof Prisma.PrismaClientInitializationError) {
-      return true;
-    }
-
     if (errorCode === 'P2021') {
       return true;
     }
 
     if (error instanceof Error) {
-      return (
+      if (
+        error.name === 'PrismaClientInitializationError' ||
         error.message.includes("Can't reach database server") ||
         error.message.includes('does not exist in the current database')
-      );
+      ) {
+        return true;
+      }
     }
 
     return false;
