@@ -35,7 +35,7 @@ async function migrateCompanies() {
   for (const company of allCompanies) {
     try {
       const res = await client.query(
-        `INSERT INTO "Company" (id, name, industry, contactName, phone, address, logo, status, "createdat", "updatedat")
+        `INSERT INTO "Company" (id, name, industry, "contactName", phone, address, logo, status, "createdAt", "updatedAt")
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW(),NOW())
          ON CONFLICT (name) DO NOTHING RETURNING id`,
         [company.id, company.name, company.industry || null, company.contactName,
