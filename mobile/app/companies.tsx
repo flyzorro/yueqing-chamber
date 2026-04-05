@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -8,6 +8,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -56,6 +57,10 @@ export default function CompaniesScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
+  const [searchText, setSearchText] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [totalCount, setTotalCount] = useState(0);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchIndustries = useCallback(async () => {
     try {
@@ -70,9 +75,10 @@ export default function CompaniesScreen() {
     }
   }, []);
 
-  const fetchCompanies = useCallback(async (options?: { refresh?: boolean; industry?: string }) => {
+  const fetchCompanies = useCallback(async (options?: { refresh?: boolean; industry?: string; keyword?: string }) => {
     const refresh = options?.refresh ?? false;
     const industry = options?.industry || selectedIndustry;
+    const keyword = options?.keyword ?? searchKeyword;
 
     setError('');
     if (!refresh) {
@@ -89,6 +95,10 @@ export default function CompaniesScreen() {
         params.set('industry', industry);
       }
 
+      if (keyword) {
+        params.set('keyword', keyword);
+      }
+
       const response = await fetch(`${API.COMPANIES}?${params.toString()}`);
       const json = (await response.json()) as CompaniesResponse;
 
@@ -97,6 +107,7 @@ export default function CompaniesScreen() {
       }
 
       setCompanies(json.data || []);
+      setTotalCount(json.pagination?.total ?? json.data.length);
     } catch (fetchError) {
       const message = fetchError instanceof Error ? fetchError.message : '加载企业名单失败';
       setError(message);
@@ -105,7 +116,7 @@ export default function CompaniesScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [selectedIndustry]);
+  }, [selectedIndustry, searchKeyword]);
 
   useEffect(() => {
     void fetchIndustries();
@@ -117,6 +128,27 @@ export default function CompaniesScreen() {
 
   const handleIndustrySelect = useCallback((industry: string) => {
     setSelectedIndustry(industry);
+  }, []);
+
+  const handleSearchChange = useCallback((text: string) => {
+    setSearchText(text);
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    debounceRef.current = setTimeout(() => {
+      setSearchKeyword(text);
+      setTotalCount(0);
+    }, 300);
+  }, []);
+
+  const clearSearch = useCallback(() => {
+    setSearchText('');
+    setSearchKeyword('');
+    setTotalCount(0);
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
   }, []);
 
   const onRefresh = () => {
@@ -161,15 +193,23 @@ export default function CompaniesScreen() {
 
     return (
       <View style={styles.stateContainer}>
-        <Text style={styles.stateTitle}>暂无企业信息</Text>
-        {selectedIndustry !== 'all' ? (
-          <Text style={styles.stateDescription}>
-            当前筛选条件：{selectedIndustry}
-            {'\n'}试试选择"全部"或其他行业
-          </Text>
-        ) : (
-          <Text style={styles.stateDescription}>企业名单更新后会展示在这里</Text>
-        )}
+        <Text style={styles.stateTitle}>未找到相关企业</Text>
+        <Text style={styles.stateDescription} accessibilityLabel={searchKeyword ? `未找到包含${searchKeyword}的企业` : undefined}>
+          {searchKeyword
+            ? `未找到包含「${searchKeyword}」的企业\n试试缩短关键词，或清除搜索恢复完整列表`
+            : selectedIndustry !== 'all'
+              ? `当前筛选条件：${selectedIndustry}\n试试选择「全部」或其他行业`
+              : '企业名单更新后会展示在这里'}
+        </Text>
+        {searchKeyword ? (
+          <Pressable style={styles.primaryButton} onPress={clearSearch}>
+            <Text style={styles.primaryButtonText}>清除搜索</Text>
+          </Pressable>
+        ) : selectedIndustry !== 'all' ? (
+          <Pressable style={styles.primaryButton} onPress={() => handleIndustrySelect('all')}>
+            <Text style={styles.primaryButtonText}>查看全部企业</Text>
+          </Pressable>
+        ) : null}
       </View>
     );
   };
@@ -182,6 +222,8 @@ export default function CompaniesScreen() {
         selectedIndustry === 'all' && styles.filterChipSelected,
       ]}
       onPress={() => handleIndustrySelect('all')}
+      accessibilityLabel={`筛选: 全部${selectedIndustry === 'all' ? '，已选中' : ''}`}
+      accessibilityState={{ selected: selectedIndustry === 'all' }}
     >
       <Text
         style={[
@@ -202,6 +244,8 @@ export default function CompaniesScreen() {
         selectedIndustry === industry && styles.filterChipSelected,
       ]}
       onPress={() => handleIndustrySelect(industry)}
+      accessibilityLabel={`筛选: ${industry}${selectedIndustry === industry ? '，已选中' : ''}`}
+      accessibilityState={{ selected: selectedIndustry === industry }}
     >
       <Text
         style={[
@@ -232,6 +276,34 @@ export default function CompaniesScreen() {
         <Text style={styles.subtitle}>按行业分类展示商会企业名录</Text>
       </View>
 
+      <View style={styles.searchBarContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="搜索企业名称或行业"
+          placeholderTextColor="#86909C"
+          value={searchText}
+          onChangeText={handleSearchChange}
+          accessibilityLabel="搜索企业名称或行业"
+          accessibilityHint="输入后自动搜索"
+          returnKeyType="search"
+        />
+        {searchText.length > 0 && (
+          <Pressable
+            onPress={clearSearch}
+            accessibilityLabel="清除搜索"
+            accessibilityRole="button"
+            style={styles.searchClearButton}
+          >
+            <Text style={styles.searchClearText}>×</Text>
+          </Pressable>
+        )}
+      </View>
+      {searchKeyword.length > 0 && totalCount > 0 && !loading && (
+        <Text style={styles.resultCount} accessibilityLiveRegion="polite">
+          找到 {totalCount} 家企业
+        </Text>
+      )}
+
       <View style={styles.filtersContainer}>
         {renderFilters()}
       </View>
@@ -248,6 +320,7 @@ export default function CompaniesScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={companies.length === 0 ? styles.listEmptyContent : styles.listContent}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          keyboardShouldPersistTaps="handled"
           ListEmptyComponent={renderEmpty}
         />
       )}
@@ -275,6 +348,37 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     color: '#4E5969',
+  },
+  searchBarContainer: {
+    marginHorizontal: 16,
+    marginBottom: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E6EB',
+    paddingHorizontal: 12,
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    fontSize: 14,
+    color: '#1F2329',
+  },
+  searchClearButton: {
+    padding: 4,
+  },
+  searchClearText: {
+    fontSize: 20,
+    color: '#86909C',
+    lineHeight: 22,
+  },
+  resultCount: {
+    fontSize: 13,
+    color: '#4E5969',
+    marginHorizontal: 16,
+    marginBottom: 8,
   },
   filtersContainer: {
     paddingVertical: 12,

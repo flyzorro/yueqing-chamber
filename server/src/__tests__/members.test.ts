@@ -3,14 +3,9 @@ import express from 'express';
 import membersRouter from '../routes/members';
 import prisma from '../lib/prisma';
 import { MemberStore } from '../models/Member';
+import { generateToken } from '../utils/jwt';
 
-// Mock auth middleware - bypass authentication in tests
-jest.mock('../middleware/auth', () => ({
-  authenticate: (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    req.user = { userId: 'test-user', phone: '13800138000', name: 'Test User' };
-    next();
-  },
-}));
+const TEST_TOKEN = `Bearer ${generateToken({ userId: 'test-user', phone: '13800138000', name: 'Test User' })}`;
 
 // Mock prisma client
 jest.mock('../lib/prisma', () => ({
@@ -40,19 +35,21 @@ describe('Members API', () => {
   });
 
   describe('Authentication', () => {
-    // Temporarily disable this test since we mock the auth middleware
-    // In a real integration test, this would verify 401 responses
-    it('should require authentication for members list', async () => {
-      // Note: This test documents the expected behavior
-      // The actual 401 check happens in integration tests with real auth middleware
+    it('should allow authenticated requests to members list', async () => {
       const mockMembers = [{ id: '1', name: 'Member 1', company: 'Company 1' }];
       (prisma.member.findMany as jest.Mock).mockResolvedValue(mockMembers);
       (prisma.member.count as jest.Mock).mockResolvedValue(1);
 
-      // With mocked auth (which bypasses), the request succeeds
-      const response = await request(app).get('/api/members?page=1&limit=10');
+      const response = await request(app)
+        .get('/api/members?page=1&limit=10')
+        .set('Authorization', TEST_TOKEN);
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
+    });
+
+    it('should reject unauthenticated requests to members list', async () => {
+      const response = await request(app).get('/api/members?page=1&limit=10');
+      expect(response.status).toBe(401);
     });
   });
 
@@ -114,7 +111,9 @@ describe('Members API', () => {
       (prisma.member.findUnique as jest.Mock).mockResolvedValue(mockMember);
       (prisma.registration.count as jest.Mock).mockResolvedValue(2);
 
-      const response = await request(app).get('/api/members/test-member-id/details');
+      const response = await request(app)
+        .get('/api/members/test-member-id/details')
+        .set('Authorization', TEST_TOKEN);
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -130,7 +129,9 @@ describe('Members API', () => {
     it('should return 404 when member does not exist', async () => {
       (prisma.member.findUnique as jest.Mock).mockResolvedValue(null);
 
-      const response = await request(app).get('/api/members/non-existent-id/details');
+      const response = await request(app)
+        .get('/api/members/non-existent-id/details')
+        .set('Authorization', TEST_TOKEN);
 
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
@@ -140,7 +141,9 @@ describe('Members API', () => {
     it('should return 500 on database error', async () => {
       (prisma.member.findUnique as jest.Mock).mockRejectedValue(new Error('Database error'));
 
-      const response = await request(app).get('/api/members/test-id/details');
+      const response = await request(app)
+        .get('/api/members/test-id/details')
+        .set('Authorization', TEST_TOKEN);
 
       expect(response.status).toBe(500);
       expect(response.body.success).toBe(false);
@@ -165,7 +168,9 @@ describe('Members API', () => {
       (prisma.member.findUnique as jest.Mock).mockResolvedValue(mockMember);
       (prisma.registration.count as jest.Mock).mockResolvedValue(0);
 
-      const response = await request(app).get('/api/members/test-member-id/details');
+      const response = await request(app)
+        .get('/api/members/test-member-id/details')
+        .set('Authorization', TEST_TOKEN);
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -209,7 +214,9 @@ describe('Members API', () => {
       (prisma.member.findUnique as jest.Mock).mockResolvedValue(mockMember);
       (prisma.registration.count as jest.Mock).mockResolvedValue(15);
 
-      const response = await request(app).get('/api/members/test-member-id/details');
+      const response = await request(app)
+        .get('/api/members/test-member-id/details')
+        .set('Authorization', TEST_TOKEN);
 
       expect(response.status).toBe(200);
       expect(response.body.data.recentActivities).toHaveLength(10);
@@ -226,7 +233,9 @@ describe('Members API', () => {
       (prisma.member.findMany as jest.Mock).mockResolvedValue(mockMembers);
       (prisma.member.count as jest.Mock).mockResolvedValue(2);
 
-      const response = await request(app).get('/api/members?page=1&limit=10');
+      const response = await request(app)
+        .get('/api/members?page=1&limit=10')
+        .set('Authorization', TEST_TOKEN);
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -240,9 +249,9 @@ describe('Members API', () => {
       (prisma.member.findMany as jest.Mock).mockResolvedValue(mockMembers);
       (prisma.member.count as jest.Mock).mockResolvedValue(1);
 
-      const response = await request(app).get(
-        '/api/members?page=1&limit=10&keyword=张&status=active'
-      );
+      const response = await request(app)
+        .get('/api/members?page=1&limit=10&keyword=张&status=active')
+        .set('Authorization', TEST_TOKEN);
 
       expect(response.status).toBe(200);
       expect(response.body.filters).toEqual({ keyword: '张', status: 'active' });
@@ -263,7 +272,9 @@ describe('Members API', () => {
       (prisma.member.findMany as jest.Mock).mockRejectedValue(prismaError);
       (prisma.member.count as jest.Mock).mockRejectedValue(prismaError);
 
-      const response = await request(app).get('/api/members?page=1&limit=10&keyword=张&status=active');
+      const response = await request(app)
+        .get('/api/members?page=1&limit=10&keyword=张&status=active')
+        .set('Authorization', TEST_TOKEN);
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
