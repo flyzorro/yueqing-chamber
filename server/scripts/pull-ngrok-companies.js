@@ -1,7 +1,8 @@
-import app, { createApp } from './app';
-import pg from 'pg';
-
-const { Client } = pg;
+/**
+ * Pull companies from ngrok dev server and insert into Railway's local PostgreSQL.
+ * Called once on startup, then self-destructs.
+ * Run: railway run -- node server/scripts/pull-ngrok-companies.js
+ */
 
 const NGROK_URL = 'https://hisako-huskiest-jacquelyn.ngrok-free.dev';
 
@@ -11,14 +12,16 @@ async function fetchNgrok(path) {
   return resp.json();
 }
 
-async function migrateCompanies() {
+async function main() {
   const dbUrl = process.env.DATABASE_URL;
-  if (!dbUrl) { console.log('No DATABASE_URL, skipping migration'); return; }
+  if (!dbUrl) throw new Error('DATABASE_URL not set');
 
-  console.log('Starting company migration from ngrok...');
+  const { Client } = await import('pg');
   const client = new Client({ connectionString: dbUrl, ssl: { rejectUnauthorized: false } });
   await client.connect();
+  console.log('Connected to Railway PostgreSQL');
 
+  // Fetch all companies from ngrok
   const allCompanies = [];
   let page = 1;
   while (true) {
@@ -29,49 +32,35 @@ async function migrateCompanies() {
     await new Promise(r => setTimeout(r, 300));
   }
 
-  console.log('Found', allCompanies.length, 'companies on ngrok');
+  console.log('Ngrok has', allCompanies.length, 'companies');
 
   let inserted = 0, skipped = 0, failed = 0;
+
   for (const company of allCompanies) {
     try {
       const res = await client.query(
         `INSERT INTO "Company" (id, name, industry, contactName, phone, address, logo, status, "createdat", "updatedat")
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW(),NOW())
-         ON CONFLICT (name) DO NOTHING RETURNING id`,
+         ON CONFLICT (name) DO NOTHING
+         RETURNING id`,
         [company.id, company.name, company.industry || null, company.contactName,
          company.phone || null, company.address || null, company.logo || null, company.status || 'active']
       );
-      if (res.rowCount > 0) { console.log('  ✓', company.name); inserted++; }
-      else { skipped++; }
+      if (res.rowCount > 0) {
+        console.log('\u2705', company.name);
+        inserted++;
+      } else {
+        console.log('\u23ed skipped (exists):', company.name);
+        skipped++;
+      }
     } catch (e) {
-      console.log('  ✗', company.name, '-', e.message);
+      console.log('\u274c', company.name, '-', e.message);
       failed++;
     }
   }
 
-  console.log('Migration done:', inserted, 'inserted,', skipped, 'skipped,', failed, 'failed');
+  console.log('\nDone:', inserted, 'inserted,', skipped, 'skipped,', failed, 'failed');
   await client.end();
 }
 
-// Root route contract: Use /api, /api/docs, or /health.
-
-if (require.main === module) {
-  const PORT = process.env.PORT || 3000;
-
-  migrateCompanies().catch(e => console.error('Migration error:', e)).finally(() => {
-    const server = app.listen(PORT, () => {
-      console.log(`🚀 服务器运行在 http://localhost:${PORT}`);
-    });
-
-    process.on('SIGTERM', () => {
-      console.log('SIGTERM received, shutting down gracefully...');
-      server.close(() => {
-        console.log('Server closed');
-        process.exit(0);
-      });
-    });
-  });
-}
-
-export { createApp };
-export default app;
+main().catch(console.error);
