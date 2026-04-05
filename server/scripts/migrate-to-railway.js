@@ -1,6 +1,6 @@
 /**
  * Migrate companies from ngrok dev server to Railway PostgreSQL.
- * Run: railway run -- node scripts/migrate-to-railway.js
+ * Run: railway run -- node server/scripts/migrate-to-railway.js
  */
 
 const NGROK_URL = 'https://hisako-huskiest-jacquelyn.ngrok-free.dev';
@@ -12,9 +12,12 @@ async function fetchNgrok(path) {
 }
 
 async function main() {
-  const { Client } = await import('pg');
+  const dbUrl = process.env.DATABASE_URL;
+  if (!dbUrl) throw new Error('DATABASE_URL not set');
+  console.log('DATABASE_URL:', dbUrl ? 'set' : 'MISSING');
 
-  const client = new Client({ ssl: { rejectUnauthorized: false } });
+  const { Client } = await import('pg');
+  const client = new Client({ connectionString: dbUrl, ssl: { rejectUnauthorized: false } });
   await client.connect();
   console.log('Connected to Railway PostgreSQL');
 
