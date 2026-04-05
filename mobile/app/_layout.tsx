@@ -36,6 +36,14 @@ export default function RootLayout() {
             headerBackTitle: '返回',
           }}
         />
+        <Stack.Screen
+          name="company-detail"
+          options={{
+            headerShown: true,
+            title: '企业详情',
+            headerBackTitle: '返回',
+          }}
+        />
         <Stack.Screen name="login" options={{ headerShown: false }} />
       </Stack>
     </>

@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -48,6 +49,7 @@ interface IndustriesResponse {
 export const COMPANY_PAGE_SIZE = 20;
 
 export default function CompaniesScreen() {
+  const router = useRouter();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [industries, setIndustries] = useState<string[]>([]);
   const [selectedIndustry, setSelectedIndustry] = useState<string>('all');
@@ -127,7 +129,7 @@ export default function CompaniesScreen() {
   };
 
   const renderItem = ({ item }: { item: Company }) => (
-    <View style={styles.card}>
+    <Pressable style={({ pressed }) => [styles.card, pressed && styles.cardPressed]} onPress={() => router.push(`/company-detail?id=${item.id}`)}>
       <Text style={styles.name}>{item.name}</Text>
       {item.industry ? <Text style={styles.industry}>{item.industry}</Text> : null}
       {(item.contactName || item.contactPhone) ? (
@@ -137,7 +139,7 @@ export default function CompaniesScreen() {
         </Text>
       ) : null}
       {item.summary ? <Text style={styles.summary}>{item.summary}</Text> : null}
-    </View>
+    </Pressable>
   );
 
   const renderEmpty = () => {
@@ -331,6 +333,9 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
+  },
+  cardPressed: {
+    opacity: 0.7,
   },
   name: {
     fontSize: 17,
