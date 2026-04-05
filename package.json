@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "start": "cd server && npm start"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",
