@@ -46,12 +46,30 @@ model Company {
   address     String?   @db.VarChar
   logo        String?   @db.VarChar
   status      String?   @default("active") @db.VarChar
+  summary     String?   @db.VarChar
   createdat   DateTime? @default(now()) @db.Timestamp(6)
   updatedat   DateTime? @default(now()) @db.Timestamp(6)
+
+  products    CompanyProduct[]
 
   @@index([status])
   @@index([name])
   @@index([industry])
+}
+
+model CompanyProduct {
+  id          String    @id @default(cuid()) @db.VarChar
+  companyId   String    @db.VarChar
+  name        String    @db.VarChar
+  description String?   @db.VarChar
+  imageUrl    String?   @db.VarChar
+  sortOrder   Int?      @default(0)
+  createdat   DateTime? @default(now()) @db.Timestamp(6)
+  updatedat   DateTime? @default(now()) @db.Timestamp(6)
+
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
 }
 
 model CivilServant {

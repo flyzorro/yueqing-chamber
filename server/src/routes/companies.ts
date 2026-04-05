@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { companyStore } from '../models/Company';
+import { companyProductStore } from '../models/CompanyProduct';
 
 const router = Router();
 const VALID_COMPANY_STATUS = new Set(['active', 'inactive']);
@@ -53,6 +54,60 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
+function mapCompanyFields(company: Record<string, unknown>) {
+  return {
+    id: company.id,
+    name: company.name,
+    industry: company.industry || null,
+    contactName: company.contactName || null,
+    contactPhone: company.phone || null,
+    summary: company.summary || null,
+    address: company.address || null,
+    status: company.status,
+    createdAt: company.createdat,
+    updatedAt: company.updatedat,
+  };
+}
+
+/**
+ * GET /api/companies/:id/products
+ * 获取企业的产品列表
+ * 注意：这个路由必须在 /:id 前面定义，避免 "products" 被当成 id
+ */
+router.get('/:id/products', async (req: Request, res: Response) => {
+  try {
+    const company = await companyStore.getById(req.params.id);
+    if (!company) {
+      res.status(404).json({
+        success: false,
+        data: null,
+        error: '企业不存在',
+      });
+      return;
+    }
+
+    const products = await companyProductStore.getByCompanyId(req.params.id);
+
+    res.json({
+      success: true,
+      data: products.map((p) => ({
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        imageUrl: p.imageUrl,
+      })),
+      error: null,
+    });
+  } catch (error) {
+    console.error('Get company products error:', error);
+    res.status(500).json({
+      success: false,
+      data: null,
+      error: '获取产品列表失败',
+    });
+  }
+});
+
 /**
  * GET /api/companies/industries
  * 获取所有行业分类
@@ -72,6 +127,38 @@ router.get('/industries', async (req: Request, res: Response) => {
       success: false,
       data: [],
       error: '获取行业分类失败',
+    });
+  }
+});
+
+/**
+ * GET /api/companies/:id
+ * 获取企业详情
+ */
+router.get('/:id', async (req: Request, res: Response) => {
+  try {
+    const company = await companyStore.getById(req.params.id);
+
+    if (!company) {
+      res.status(404).json({
+        success: false,
+        data: null,
+        error: '企业不存在',
+      });
+      return;
+    }
+
+    res.json({
+      success: true,
+      data: mapCompanyFields(company as Record<string, unknown>),
+      error: null,
+    });
+  } catch (error) {
+    console.error('Get company detail error:', error);
+    res.status(500).json({
+      success: false,
+      data: null,
+      error: '获取企业详情失败',
     });
   }
 });

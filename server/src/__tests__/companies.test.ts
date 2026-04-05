@@ -11,9 +11,11 @@ jest.mock('../lib/prisma', () => ({
     company: {
       findMany: jest.fn(),
       count: jest.fn(),
+      findUnique: jest.fn(),
     },
     member: {
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       findMany: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
@@ -22,6 +24,9 @@ jest.mock('../lib/prisma', () => ({
     },
     registration: {
       count: jest.fn(),
+    },
+    companyProduct: {
+      findMany: jest.fn(),
     },
   },
 }));
@@ -129,6 +134,78 @@ describe('Companies API', () => {
       expect(response.status).toBe(500);
       expect(response.body.success).toBe(false);
       expect(response.body.error).toBe('获取企业列表失败');
+    });
+  });
+
+  describe('GET /api/companies/:id/products', () => {
+    const mockCompany = {
+      id: 'company-1',
+      name: '测试公司',
+      industry: '科技',
+      contactName: '张三',
+      phone: '13800138000',
+      address: '杭州',
+      logo: null,
+      status: 'active',
+      summary: null,
+      createdat: new Date(),
+      updatedat: new Date(),
+    };
+
+    it('should return product list for existing company', async () => {
+      const mockProducts = [
+        { id: 'p1', companyId: 'company-1', name: '产品A', description: '描述A', imageUrl: null, sortOrder: 0, createdat: new Date(), updatedat: new Date() },
+        { id: 'p2', companyId: 'company-1', name: '产品B', description: '描述B', imageUrl: 'https://x.com/b.jpg', sortOrder: 1, createdat: new Date(), updatedat: new Date() },
+      ];
+
+      (prisma.company.findUnique as jest.Mock).mockResolvedValue(mockCompany);
+      (prisma.member.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.companyProduct.findMany as jest.Mock).mockResolvedValue(mockProducts);
+
+      const response = await request(app).get('/api/companies/company-1/products');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toHaveLength(2);
+      expect(response.body.data[0]).toEqual({ id: 'p1', name: '产品A', description: '描述A', imageUrl: null });
+      expect(response.body.data[1].imageUrl).toBe('https://x.com/b.jpg');
+      expect(prisma.companyProduct.findMany).toHaveBeenCalledWith({
+        where: { companyId: 'company-1' },
+        orderBy: [{ sortOrder: 'asc' }, { createdat: 'desc' }],
+      });
+    });
+
+    it('should return empty array when company has no products', async () => {
+      (prisma.company.findUnique as jest.Mock).mockResolvedValue(mockCompany);
+      (prisma.member.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.companyProduct.findMany as jest.Mock).mockResolvedValue([]);
+
+      const response = await request(app).get('/api/companies/company-1/products');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toEqual([]);
+    });
+
+    it('should return 404 when company not found', async () => {
+      (prisma.company.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.member.findFirst as jest.Mock).mockResolvedValue(null);
+
+      const response = await request(app).get('/api/companies/nonexistent/products');
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error).toBe('企业不存在');
+    });
+
+    it('should return 500 on database error', async () => {
+      (prisma.company.findUnique as jest.Mock).mockRejectedValue(new Error('Database error'));
+
+      const response = await request(app).get('/api/companies/company-1/products');
+
+      expect(response.status).toBe(500);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error).toBe('获取产品列表失败');
     });
   });
 
