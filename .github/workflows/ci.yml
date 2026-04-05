@@ -36,7 +36,6 @@ jobs:
 
   mobile:
     runs-on: ubuntu-latest
-    needs: check-pr-screenshots
     defaults:
       run:
         working-directory: mobile
