@@ -35,16 +35,16 @@ async function migrateCompanies() {
   for (const company of allCompanies) {
     try {
       const res = await client.query(
-        `INSERT INTO "Company" (id, name, industry, "contactName", phone, address, logo, status, "createdAt", "updatedAt")
+        `INSERT INTO "Company" (id, name, industry, contactname, phone, address, logo, status, createdat, updatedat)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW(),NOW())
          ON CONFLICT (name) DO NOTHING RETURNING id`,
         [company.id, company.name, company.industry || null, company.contactName,
          company.phone || null, company.address || null, company.logo || null, company.status || 'active']
       );
-      if ((res.rowCount ?? 0) > 0) { console.log('  ✓', company.name); inserted++; }
+      if ((res.rowCount ?? 0) > 0) { console.log('  \u2713', company.name); inserted++; }
       else { skipped++; }
     } catch (e) {
-      console.log('  ✗', company.name, '-', (e as Error).message);
+      console.log('  \u2717', company.name, '-', (e as Error).message);
       failed++;
     }
   }
@@ -60,7 +60,7 @@ if (require.main === module) {
 
   migrateCompanies().catch(e => console.error('Migration error:', e)).finally(() => {
     const server = app.listen(PORT, () => {
-      console.log(`🚀 服务器运行在 http://localhost:${PORT}`);
+      console.log(`\urocket 服务器运行在 http://localhost:${PORT}`);
     });
 
     process.on('SIGTERM', () => {
