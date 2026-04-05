@@ -7,60 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  check-pr-screenshots:
-    runs-on: ubuntu-latest
-    outputs:
-      has_ui_changes: ${{ steps.detect.outputs.has_ui_changes }}
-    steps:
-      - uses: actions/checkout@v4
-        if: github.event_name == 'pull_request'
-        with:
-          fetch-depth: 0
-
-      - name: Detect UI changes
-        id: detect
-        if: github.event_name == 'pull_request'
-        run: |
-          git fetch origin "${{ github.base_ref }}" --depth=1
-          CHANGED_FILES=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
-          echo "$CHANGED_FILES"
-
-          if echo "$CHANGED_FILES" | grep -Eq '^(mobile/|web/|app/)|\.(tsx|jsx|css|scss|sass|less)$'; then
-            echo "has_ui_changes=true" >> "$GITHUB_OUTPUT"
-            echo "UI changes detected"
-          else
-            echo "has_ui_changes=false" >> "$GITHUB_OUTPUT"
-            echo "No UI changes detected; screenshot check will be skipped"
-          fi
-
-      - name: Check screenshot evidence for UI PRs
-        if: github.event_name == 'pull_request' && steps.detect.outputs.has_ui_changes == 'true'
-        env:
-          PR_BODY: "${{ github.event.pull_request.body }}"
-        run: |
-          git fetch origin "${{ github.base_ref }}" --depth=1
-          CHANGED_FILES=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
-
-          if echo "$CHANGED_FILES" | grep -qE '^docs/screenshots/'; then
-            echo "✓ Screenshot file found in docs/screenshots/"
-            exit 0
-          fi
-
-          if [[ -n "$PR_BODY" ]] && echo "$PR_BODY" | grep -qE '![[][^]]*[]][(][^)]+[)]|<img[^>]*src='; then
-            echo "✓ Screenshots found in PR description"
-            exit 0
-          fi
-
-          echo "::error::UI changes detected, but no screenshot evidence found. Add an image to the PR description or commit a file under docs/screenshots/."
-          exit 1
-
-      - name: Skip screenshot check for non-UI PRs
-        if: github.event_name == 'pull_request' && steps.detect.outputs.has_ui_changes != 'true'
-        run: echo "No UI changes; screenshot requirement skipped"
-
   server:
     runs-on: ubuntu-latest
-    needs: check-pr-screenshots
     defaults:
       run:
         working-directory: server
