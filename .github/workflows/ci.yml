@@ -131,9 +131,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
       - name: Deploy to Railway Production
-        uses: wagonhe/railway-deploy-action@v1
-        with:
-          railway-token: ${{ secrets.RAILWAY_API_TOKEN }}
-          railway-project-id: ${{ secrets.RAILWAY_PROJECT_ID }}
-          railway-environment-id: ${{ secrets.RAILWAY_ENVIRONMENT_ID }}
+        run: railway up --project ${{ secrets.RAILWAY_PROJECT_ID }} --environment ${{ secrets.RAILWAY_ENVIRONMENT_ID }} --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
