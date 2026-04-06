@@ -85,6 +85,7 @@ jobs:
           --health-retries=5
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/yueqing_chamber_test?schema=public
+      JWT_SECRET: test-jwt-secret-for-ci
 
     steps:
       - uses: actions/checkout@v4
