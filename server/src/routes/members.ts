@@ -9,9 +9,9 @@ const VALID_MEMBER_STATUS = new Set(['active', 'inactive']);
 
 /**
  * GET /api/members
- * 获取会员列表（分页 + 搜索 + 状态筛选）- 需要登录
+ * 获取会员列表（分页 + 搜索 + 状态筛选）- 公开端点
  */
-router.get('/', authenticate, async (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
     const page = Math.max(parseInt(req.query.page as string, 10) || 1, 1);
     const limit = Math.max(parseInt(req.query.limit as string, 10) || 10, 1);
