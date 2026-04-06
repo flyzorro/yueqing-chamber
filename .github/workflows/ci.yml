@@ -33,6 +33,9 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Unit tests
+        env:
+          JWT_SECRET: test-jwt-secret-for-ci
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/yueqing_chamber_test?schema=public
         run: npm test
 
   mobile:
