@@ -7,5 +7,7 @@ module.exports = {
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts'],
   transform: {
     '^.+\\.ts$': ['ts-jest', { useESM: false }]
-  }
+  },
+  // Silence console output in tests to avoid noise from expected console.error/warn calls
+  silent: true
 };
