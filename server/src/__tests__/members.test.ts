@@ -47,14 +47,9 @@ describe('Members API', () => {
       expect(response.body.success).toBe(true);
     });
 
-    it('should allow unauthenticated requests to members list (public endpoint)', async () => {
-      const mockMembers = [{ id: '1', name: 'Member 1', company: 'Company 1' }];
-      (prisma.member.findMany as jest.Mock).mockResolvedValue(mockMembers);
-      (prisma.member.count as jest.Mock).mockResolvedValue(1);
-
+    it('should reject unauthenticated requests to members list', async () => {
       const response = await request(app).get('/api/members?page=1&limit=10');
-      expect(response.status).toBe(200);
-      expect(response.body.success).toBe(true);
+      expect(response.status).toBe(401);
     });
   });
 
