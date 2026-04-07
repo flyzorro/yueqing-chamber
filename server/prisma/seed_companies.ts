@@ -951,15 +951,15 @@ async function main() {
     {
       companyName: '浙江天正电气股份有限公司',
       products: [
-        { seedKey: 'power-cabinet', name: '智能配电柜', description: '数字化配电管理，支持远程监控和能耗分析', sortOrder: 0 },
-        { seedKey: 'circuit-breaker', name: '小型断路器', description: '家用及工业用电路保护元件，分断能力强', sortOrder: 1 },
+        { seedKey: 'power-cabinet', name: '智能配电柜', description: '数字化配电管理，支持远程监控和能耗分析', sortOrder: 0, imageUrl: 'https://picsum.photos/seed/power-cabinet/400/300' },
+        { seedKey: 'circuit-breaker', name: '小型断路器', description: '家用及工业用电路保护元件，分断能力强', sortOrder: 1, imageUrl: 'https://picsum.photos/seed/circuit-breaker/400/300' },
       ],
     },
     {
       companyName: '电光防爆科技股份有限公司',
       products: [
-        { seedKey: 'monitoring-system', name: '矿用防爆监控系统', description: '煤矿井下视频监控与安全预警系统', sortOrder: 0 },
-        { seedKey: 'comm-device', name: '井下通信设备', description: '矿用本安型通信终端，支持语音和数据传输', sortOrder: 1 },
+        { seedKey: 'monitoring-system', name: '矿用防爆监控系统', description: '煤矿井下视频监控与安全预警系统', sortOrder: 0, imageUrl: 'https://picsum.photos/seed/monitoring-system/400/300' },
+        { seedKey: 'comm-device', name: '井下通信设备', description: '矿用本安型通信终端，支持语音和数据传输', sortOrder: 1, imageUrl: 'https://picsum.photos/seed/comm-device/400/300' },
       ],
     },
   ];
@@ -983,7 +983,7 @@ async function main() {
       if (existing) {
         await prisma.companyProduct.update({
           where: { id: existing.id },
-          data: { name: product.name, description: product.description, sortOrder: product.sortOrder },
+          data: { name: product.name, description: product.description, sortOrder: product.sortOrder, imageUrl: product.imageUrl || null },
         });
       } else {
         await prisma.companyProduct.create({
@@ -992,6 +992,7 @@ async function main() {
             seedKey: product.seedKey,
             name: product.name,
             description: product.description,
+            imageUrl: product.imageUrl || null,
             sortOrder: product.sortOrder,
           },
         });

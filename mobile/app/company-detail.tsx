@@ -128,6 +128,7 @@ interface ProductItem {
   name: string;
   description: string | null;
   imageUrl: string | null;
+  imageLoadFailed?: boolean;
 }
 
 interface ProductListResponse {
@@ -149,6 +150,41 @@ interface CompanyDetailResponse {
     status?: string | null;
   };
   error?: string;
+}
+
+function ProductCard({ item, onPress }: { item: ProductItem; onPress: (item: ProductItem) => void }) {
+  const [imageFailed, setImageFailed] = useState(false);
+
+  return (
+    <TouchableOpacity
+      style={styles.productCard}
+      onPress={() => onPress(item)}
+      activeOpacity={0.7}
+    >
+      {item.imageUrl && !imageFailed ? (
+        <Image
+          source={{ uri: item.imageUrl }}
+          style={styles.productImage}
+          resizeMode="cover"
+          onError={() => {
+            setImageFailed(true);
+          }}
+        />
+      ) : (
+        <View style={styles.productImagePlaceholder}>
+          <Text style={styles.productImagePlaceholderText}>📷</Text>
+        </View>
+      )}
+      <View style={styles.productInfo}>
+        <Text style={styles.productName}>{item.name}</Text>
+        {item.description && (
+          <Text style={styles.productDescription} numberOfLines={2}>
+            {item.description}
+          </Text>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
 }
 
 export default function CompanyDetailScreen() {
@@ -203,16 +239,26 @@ export default function CompanyDetailScreen() {
     setProductsLoading(true);
     setProductsError('');
     try {
-      const response = await fetch(API.COMPANY_PRODUCTS(id));
+      const url = API.COMPANY_PRODUCTS(id);
+      if (__DEV__) {
+        console.log('[Fetch Products] URL:', url, 'Company ID:', id);
+      }
+      const response = await fetch(url);
       const json: ProductListResponse = await response.json();
+      if (__DEV__) {
+        console.log('[Fetch Products] Response:', json);
+      }
       if (response.ok && json.success) {
         setProducts(json.data);
       } else if (response.status === 404) {
         setProductsError('企业不存在');
       } else {
-        setProductsError('获取产品列表失败');
+        setProductsError(json.error || '获取产品列表失败');
       }
-    } catch {
+    } catch (err) {
+      if (__DEV__) {
+        console.error('[Fetch Products] Error:', err);
+      }
       setProductsError('网络错误，请稍后重试');
     } finally {
       setProductsLoading(false);
@@ -260,6 +306,9 @@ export default function CompanyDetailScreen() {
         return <View style={styles.tabContent}>{renderSummaryContent()}</View>;
 
       case 1: // 产品介绍
+        if (__DEV__) {
+          console.log('[产品介绍 Tab] loading:', productsLoading, 'error:', productsError, 'products.length:', products.length);
+        }
         if (productsLoading) {
           return (
             <View style={styles.centerContent}>
@@ -291,23 +340,7 @@ export default function CompanyDetailScreen() {
             keyExtractor={(item) => item.id}
             scrollEnabled={false}
             renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.productCard}
-                onPress={() => handleProductPress(item)}
-                activeOpacity={0.7}
-              >
-                {item.imageUrl && (
-                  <Image source={{ uri: item.imageUrl }} style={styles.productImage} resizeMode="cover" />
-                )}
-                <View style={styles.productInfo}>
-                  <Text style={styles.productName}>{item.name}</Text>
-                  {item.description && (
-                    <Text style={styles.productDescription} numberOfLines={2}>
-                      {item.description}
-                    </Text>
-                  )}
-                </View>
-              </TouchableOpacity>
+              <ProductCard item={item} onPress={handleProductPress} />
             )}
             ItemSeparatorComponent={ProductSeparator}
           />
@@ -582,6 +615,17 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 160,
     backgroundColor: '#F2F3F5',
+  },
+  productImagePlaceholder: {
+    width: '100%',
+    height: 160,
+    backgroundColor: '#F2F3F5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  productImagePlaceholderText: {
+    fontSize: 40,
+    color: '#C9CDD4',
   },
   productInfo: {
     padding: 12,
