@@ -944,22 +944,22 @@ async function main() {
     {
       companyName: '立帮秀珀化工涂料有限公司',
       products: [
-        { seedKey: 'floor-coating', name: '高性能地坪涂料', description: '适用于工业厂房、地下车库等场景，耐磨抗压', sortOrder: 0, imageUrl: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400&h=300&fit=crop' },
-        { seedKey: 'anti-corrosion', name: '环保防腐涂装系统', description: '水性环保配方，耐化学品腐蚀，适用于化工厂房', sortOrder: 1, imageUrl: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=300&fit=crop' },
+        { seedKey: 'floor-coating', name: '高性能地坪涂料', description: '适用于工业厂房、地下车库等场景，耐磨抗压', sortOrder: 0, imageUrl: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400' },
+        { seedKey: 'anti-corrosion', name: '环保防腐涂装系统', description: '水性环保配方，耐化学品腐蚀，适用于化工厂房', sortOrder: 1, imageUrl: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400' },
       ],
     },
     {
       companyName: '浙江天正电气股份有限公司',
       products: [
-        { seedKey: 'power-cabinet', name: '智能配电柜', description: '数字化配电管理，支持远程监控和能耗分析', sortOrder: 0, imageUrl: 'https://images.unsplash.com/photo-1558494949-ef526b0042a0?w=400&h=300&fit=crop' },
-        { seedKey: 'circuit-breaker', name: '小型断路器', description: '家用及工业用电路保护元件，分断能力强', sortOrder: 1, imageUrl: 'https://images.unsplash.com/photo-1555662795-4c7884b5a8d3?w=400&h=300&fit=crop' },
+        { seedKey: 'power-cabinet', name: '智能配电柜', description: '数字化配电管理，支持远程监控和能耗分析', sortOrder: 0, imageUrl: 'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=400' },
+        { seedKey: 'circuit-breaker', name: '小型断路器', description: '家用及工业用电路保护元件，分断能力强', sortOrder: 1, imageUrl: 'https://images.unsplash.com/photo-1558494949-ef526b0042a0?w=400' },
       ],
     },
     {
       companyName: '电光防爆科技股份有限公司',
       products: [
-        { seedKey: 'monitoring-system', name: '矿用防爆监控系统', description: '煤矿井下视频监控与安全预警系统', sortOrder: 0, imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop' },
-        { seedKey: 'comm-device', name: '井下通信设备', description: '矿用本安型通信终端，支持语音和数据传输', sortOrder: 1, imageUrl: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=400&h=300&fit=crop' },
+        { seedKey: 'monitoring-system', name: '矿用防爆监控系统', description: '煤矿井下视频监控与安全预警系统', sortOrder: 0, imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400' },
+        { seedKey: 'comm-device', name: '井下通信设备', description: '矿用本安型通信终端，支持语音和数据传输', sortOrder: 1, imageUrl: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=400' },
       ],
     },
   ];
