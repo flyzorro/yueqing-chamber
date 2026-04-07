@@ -39,3 +39,22 @@ This project uses gstack for enhanced Claude Code capabilities.
 - `/unfreeze` — Unfreeze state
 - `/gstack-upgrade` — Upgrade gstack
 - `/learn` — Learn from codebase
+
+## Git Workflow Rules
+
+1. **Before developing or committing, always rebase to the latest remote main:**
+   ```bash
+   git fetch origin main
+   git rebase origin/main
+   ```
+
+2. **Use git worktree for new features, never reuse old branches:**
+   ```bash
+   git worktree add -b feature/your-feature-name ../feature-worktree
+   ```
+
+3. **Always create a PR for code changes, never merge directly to main:**
+   - Create a new branch for your feature
+   - Commit your changes
+   - Push and create a PR
+   - Wait for review and approval before merging
