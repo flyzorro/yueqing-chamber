@@ -248,7 +248,7 @@ export default function CompanyDetailScreen() {
 
   const renderSummaryContent = () => {
     const blocks = company?.summary;
-    if (!blocks || blocks.length === 0) {
+    if (!blocks || !Array.isArray(blocks) || blocks.length === 0) {
       return <Text style={styles.emptyText}>暂无详细介绍</Text>;
     }
     return blocks.map((block, i) => renderBlock(block, i));
