@@ -40,6 +40,17 @@ export default function RegistrationsScreen() {
       const response = await fetch(`${API.ACTIVITIES}/${params.activityId}/registrations`, {
         headers,
       });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          setError('该功能需要更新服务器版本，请联系管理员');
+        } else {
+          setError('加载失败，请稍后重试');
+        }
+        setLoading(false);
+        return;
+      }
+
       const json = await response.json();
 
       if (json.success) {
