@@ -10,7 +10,7 @@ describe('company directory mobile implementation', () => {
     const screenSource = readAppFile('companies.tsx');
 
     expect(screenSource).toContain('企业名单');
-    expect(screenSource).toContain('独立展示商会企业名录');
+    expect(screenSource).toContain('按行业分类展示商会企业名录');
     expect(screenSource).toContain('正在加载企业名单');
     expect(screenSource).toContain('API.COMPANIES');
     expect(screenSource).toContain('联系人：');
