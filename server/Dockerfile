@@ -19,6 +19,7 @@ RUN ./node_modules/.bin/prisma generate
 COPY server/tsconfig.json ./
 COPY server/src ./src/
 COPY server/scripts ./scripts/
+COPY server/public ./public/
 RUN ./node_modules/.bin/tsc
 
 EXPOSE 3000
