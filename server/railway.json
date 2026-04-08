@@ -1,0 +1,11 @@
+{
+  "$schema": "https://railway.com/railway-schema.json",
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "serverless": true,
+    "numReplicas": 1,
+    "sleepApplication": true
+  }
+}
