@@ -106,13 +106,8 @@ export class ActivityStore {
       return { success: false, error: '该活动不接受报名' };
     }
 
-    // 检查是否已满
-    if (!activity.currentparticipants || !activity.maxparticipants || activity.currentparticipants >= activity.maxparticipants) {
-      return { success: false, error: '报名人数已满' };
-    }
-
     try {
-      // 事务：创建 Registration 记录 + increment currentparticipants
+      // 事务：原子性地检查容量、防止重复报名、递增计数
       await prisma.$transaction(async (tx) => {
         // 检查是否已存在报名记录
         const existing = await tx.registration.findUnique({
@@ -128,19 +123,41 @@ export class ActivityStore {
           throw new Error('ALREADY_REGISTERED');
         }
 
-        // 创建报名记录
+        // 获取最新的活动数据并检查容量
+        const currentActivity = await tx.activity.findUnique({
+          where: { id: activityId }
+        });
+
+        // 显式检查 null/undefined（0 是有效值）
+        if (
+          currentActivity?.currentparticipants === null ||
+          currentActivity?.maxparticipants === null ||
+          currentActivity!.currentparticipants >= currentActivity!.maxparticipants
+        ) {
+          throw new Error('ACTIVITY_FULL');
+        }
+
+        // 条件更新：只有 currentparticipants < maxparticipants 时才成功
+        const updated = await tx.activity.update({
+          where: {
+            id: activityId,
+            currentparticipants: { lt: currentActivity!.maxparticipants }
+          },
+          data: {
+            currentparticipants: { increment: 1 }
+          }
+        });
+
+        // 如果没有行被更新，说明容量已满
+        if (!updated) {
+          throw new Error('ACTIVITY_FULL');
+        }
+
+        // 容量检查通过后创建报名记录
         await tx.registration.create({
           data: {
             memberId,
             activityId
-          }
-        });
-
-        // 递增参与人数
-        await tx.activity.update({
-          where: { id: activityId },
-          data: {
-            currentparticipants: { increment: 1 }
           }
         });
       });
@@ -149,6 +166,9 @@ export class ActivityStore {
     } catch (error) {
       if (error instanceof Error && error.message === 'ALREADY_REGISTERED') {
         return { success: false, error: '您已报名该活动' };
+      }
+      if (error instanceof Error && error.message === 'ACTIVITY_FULL') {
+        return { success: false, error: '报名人数已满' };
       }
       // Prisma P2002: Unique constraint violation
       if (error instanceof Error && error.message.includes('P2002')) {

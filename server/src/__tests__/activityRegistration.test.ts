@@ -77,16 +77,18 @@ describe('Activity Registration - New Implementation', () => {
 
       (prisma.activity.findUnique as jest.Mock).mockResolvedValue(mockActivity);
       (prisma.member.findUnique as jest.Mock).mockResolvedValue(mockMember);
-      (prisma.$transaction as jest.Mock).mockImplementation(async (fn) => {
-        await fn({
+      (prisma.$transaction as jest.Mock).mockImplementation(async (txFn) => {
+        const mockTx = {
           registration: {
             findUnique: jest.fn().mockResolvedValue(null),
             create: jest.fn(),
           },
           activity: {
-            update: jest.fn(),
+            findUnique: jest.fn().mockResolvedValue(mockActivity),
+            update: jest.fn().mockResolvedValue({ id: 'activity-1', currentparticipants: 46 }),
           },
-        });
+        };
+        return await txFn(mockTx);
       });
 
       const response = await request(app).post('/api/activities/activity-1/register');
@@ -112,6 +114,19 @@ describe('Activity Registration - New Implementation', () => {
 
       (prisma.activity.findUnique as jest.Mock).mockResolvedValue(mockActivity);
       (prisma.member.findUnique as jest.Mock).mockResolvedValue(mockMember);
+      (prisma.$transaction as jest.Mock).mockImplementation(async (txFn) => {
+        const mockTx = {
+          registration: {
+            findUnique: jest.fn().mockResolvedValue(null),
+            create: jest.fn(),
+          },
+          activity: {
+            findUnique: jest.fn().mockResolvedValue(mockActivity),
+            update: jest.fn().mockRejectedValue(new Error('ACTIVITY_FULL')),
+          },
+        };
+        return await txFn(mockTx);
+      });
 
       const response = await request(app).post('/api/activities/activity-1/register');
 
