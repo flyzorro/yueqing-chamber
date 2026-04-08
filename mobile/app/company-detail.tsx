@@ -15,13 +15,10 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { API } from './utils/api';
+import { API, API_BASE_URL } from './utils/api';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-// Get API base URL for converting relative image paths to absolute URLs
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || '';
 
 // Convert relative image URL to absolute URL for React Native Image
 const getImageUri = (imageUrl: string | null) => {

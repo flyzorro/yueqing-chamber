@@ -14,13 +14,21 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { API } from './utils/api';
 
+type Block =
+  | { type: 'heading'; level: 1 | 2 | 3; text: string }
+  | { type: 'paragraph'; text: string }
+  | { type: 'image'; url: string; caption?: string }
+  | { type: 'video'; url: string; poster?: string }
+  | { type: 'gallery'; images: { url: string; caption?: string }[] }
+  | { type: 'divider' };
+
 export interface Company {
   id: string;
   name: string;
   industry?: string | null;
   contactName?: string | null;
   contactPhone?: string | null;
-  summary?: string | null;
+  summary?: string | Block[] | null;
   status?: string | null;
 }
 
@@ -48,6 +56,37 @@ interface IndustriesResponse {
 }
 
 export const COMPANY_PAGE_SIZE = 20;
+
+function parseSummaryText(summary: string | Block[] | null | undefined): string | null {
+  if (!summary) return null;
+
+  // If already an array of blocks, extract text from first paragraph
+  if (Array.isArray(summary)) {
+    const paragraphBlock = summary.find((block) => block.type === 'paragraph');
+    if (paragraphBlock && 'text' in paragraphBlock) {
+      return paragraphBlock.text.slice(0, 100) + (paragraphBlock.text.length > 100 ? '...' : '');
+    }
+    return null;
+  }
+
+  // If string, try to parse as JSON
+  if (typeof summary === 'string') {
+    try {
+      const parsed = JSON.parse(summary) as Block[];
+      if (Array.isArray(parsed)) {
+        const paragraphBlock = parsed.find((block) => block.type === 'paragraph');
+        if (paragraphBlock && 'text' in paragraphBlock) {
+          return paragraphBlock.text.slice(0, 100) + (paragraphBlock.text.length > 100 ? '...' : '');
+        }
+      }
+    } catch {
+      // Not JSON, return as-is (truncated)
+      return summary.length > 100 ? summary.slice(0, 100) + '...' : summary;
+    }
+  }
+
+  return null;
+}
 
 export default function CompaniesScreen() {
   const router = useRouter();
@@ -160,19 +199,23 @@ export default function CompaniesScreen() {
     void fetchCompanies();
   };
 
-  const renderItem = ({ item }: { item: Company }) => (
-    <Pressable style={({ pressed }) => [styles.card, pressed && styles.cardPressed]} onPress={() => router.push(`/company-detail?id=${item.id}`)}>
-      <Text style={styles.name}>{item.name}</Text>
-      {item.industry ? <Text style={styles.industry}>{item.industry}</Text> : null}
-      {(item.contactName || item.contactPhone) ? (
-        <Text style={styles.contact}>
-          联系人：{item.contactName || '暂无'}
-          {item.contactPhone ? ` · ${item.contactPhone}` : ''}
-        </Text>
-      ) : null}
-      {item.summary ? <Text style={styles.summary}>{item.summary}</Text> : null}
-    </Pressable>
-  );
+  const renderItem = ({ item }: { item: Company }) => {
+    const summaryText = parseSummaryText(item.summary);
+
+    return (
+      <Pressable style={({ pressed }) => [styles.card, pressed && styles.cardPressed]} onPress={() => router.push(`/company-detail?id=${item.id}`)}>
+        <Text style={styles.name}>{item.name}</Text>
+        {item.industry ? <Text style={styles.industry}>{item.industry}</Text> : null}
+        {(item.contactName || item.contactPhone) ? (
+          <Text style={styles.contact}>
+            联系人：{item.contactName || '暂无'}
+            {item.contactPhone ? ` · ${item.contactPhone}` : ''}
+          </Text>
+        ) : null}
+        {summaryText ? <Text style={styles.summary}>{summaryText}</Text> : null}
+      </Pressable>
+    );
+  };
 
   const renderEmpty = () => {
     if (loading) {
