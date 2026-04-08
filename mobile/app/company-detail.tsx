@@ -20,6 +20,18 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+// Get API base URL for converting relative image paths to absolute URLs
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || '';
+
+// Convert relative image URL to absolute URL for React Native Image
+const getImageUri = (imageUrl: string | null) => {
+  if (!imageUrl) return null;
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl;
+  }
+  return `${API_BASE_URL}${imageUrl}`;
+};
+
 const SEGMENTS = ['企业介绍', '产品介绍', '联系方式'] as const;
 
 type Block =
@@ -155,15 +167,17 @@ interface CompanyDetailResponse {
 function ProductCard({ item, onPress }: { item: ProductItem; onPress: (item: ProductItem) => void }) {
   const [imageFailed, setImageFailed] = useState(false);
 
+  const imageUri = getImageUri(item.imageUrl);
+
   return (
     <TouchableOpacity
       style={styles.productCard}
       onPress={() => onPress(item)}
       activeOpacity={0.7}
     >
-      {item.imageUrl && !imageFailed ? (
+      {imageUri && !imageFailed ? (
         <Image
-          source={{ uri: item.imageUrl }}
+          source={{ uri: imageUri }}
           style={styles.productImage}
           resizeMode="cover"
           onError={() => {
@@ -455,13 +469,19 @@ export default function CompanyDetailScreen() {
             </TouchableOpacity>
           </View>
           <ScrollView style={styles.modalBody}>
-            {selectedProduct?.imageUrl && (
-              <Image
-                source={{ uri: selectedProduct.imageUrl }}
-                style={styles.modalImage}
-                resizeMode="cover"
-              />
-            )}
+            {(() => {
+              const imageUri = selectedProduct ? getImageUri(selectedProduct.imageUrl) : null;
+              if (imageUri) {
+                return (
+                  <Image
+                    source={{ uri: imageUri }}
+                    style={styles.modalImage}
+                    resizeMode="cover"
+                  />
+                );
+              }
+              return null;
+            })()}
             <Text style={styles.modalDescription}>
               {selectedProduct?.description || '暂无产品描述'}
             </Text>
