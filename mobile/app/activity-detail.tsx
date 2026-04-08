@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Pressable, ScrollView, StyleSheet, Text, View, Image, FlatList, ActivityIndicator } from 'react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { API } from './utils/api';
-import { getAuthHeaders } from './utils/auth';
+import { getAuthHeaders, getUser } from './utils/auth';
 
 interface ActivityPhoto {
   id: string;
@@ -38,6 +38,16 @@ export default function ActivityDetailScreen() {
 
   const [photos, setPhotos] = useState<ActivityPhoto[]>([]);
   const [loadingPhotos, setLoadingPhotos] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // 检查当前用户是否为管理员
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const user = await getUser();
+      setIsAdmin(user?.isAdmin ?? false);
+    };
+    void checkAdmin();
+  }, []);
 
   const title = typeof params.title === 'string' ? params.title : '未命名活动';
   const date = typeof params.date === 'string' ? params.date : '日期待定';
@@ -96,9 +106,15 @@ export default function ActivityDetailScreen() {
           <Text style={styles.value}>{location}</Text>
           <Text style={styles.label}>报名人数</Text>
           <Text style={styles.value}>{current} / {max}</Text>
-          <Pressable style={styles.registrationsButton} onPress={viewRegistrations}>
-            <Text style={styles.registrationsButtonText}>查看报名者</Text>
-          </Pressable>
+          {isAdmin ? (
+            <Pressable style={styles.registrationsButton} onPress={viewRegistrations}>
+              <Text style={styles.registrationsButtonText}>查看报名者</Text>
+            </Pressable>
+          ) : (
+            <Pressable style={[styles.registrationsButton, { backgroundColor: '#CCCCCC' }]} disabled>
+              <Text style={[styles.registrationsButtonText, { color: '#888888' }]}>仅限管理员查看</Text>
+            </Pressable>
+          )}
         </View>
 
         <View style={styles.gallerySection}>

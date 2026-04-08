@@ -3,6 +3,12 @@ import { userStore } from '../models/User';
 import { generateToken } from '../utils/jwt';
 import { authenticate } from '../middleware/auth';
 
+// 检查是否为管理员
+function isAdmin(phone: string): boolean {
+  const adminPhones = (process.env.ADMIN_PHONES?.split(',').map(s => s.trim()).filter(Boolean)) || [];
+  return adminPhones.includes(phone);
+}
+
 const router = Router();
 
 /**
@@ -66,7 +72,8 @@ router.post('/register', async (req: Request, res: Response) => {
           id: user.id,
           phone: user.phone,
           name: user.name,
-          avatar: user.avatar
+          avatar: user.avatar,
+          isAdmin: isAdmin(user.phone)
         },
         token
       }
@@ -133,7 +140,8 @@ router.post('/login', async (req: Request, res: Response) => {
           id: user.id,
           phone: user.phone,
           name: user.name,
-          avatar: user.avatar
+          avatar: user.avatar,
+          isAdmin: isAdmin(user.phone)
         },
         token
       }
