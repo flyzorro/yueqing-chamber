@@ -45,6 +45,11 @@ export default function ActivityDetailScreen() {
   const current = typeof params.currentParticipants === 'string' ? params.currentParticipants : '0';
   const max = typeof params.maxParticipants === 'string' ? params.maxParticipants : '0';
 
+  const viewRegistrations = () => {
+    if (!params.id) return;
+    router.push(`/registrations?activityId=${params.id}&activityTitle=${encodeURIComponent(title)}`);
+  };
+
   const fetchPhotos = useCallback(async () => {
     if (!params.id) return;
 
@@ -91,6 +96,9 @@ export default function ActivityDetailScreen() {
           <Text style={styles.value}>{location}</Text>
           <Text style={styles.label}>报名人数</Text>
           <Text style={styles.value}>{current} / {max}</Text>
+          <Pressable style={styles.registrationsButton} onPress={viewRegistrations}>
+            <Text style={styles.registrationsButtonText}>查看报名者</Text>
+          </Pressable>
         </View>
 
         <View style={styles.gallerySection}>
@@ -141,6 +149,19 @@ const styles = StyleSheet.create({
   meta: { fontSize: 13, color: '#86909C' },
   label: { marginTop: 8, fontSize: 13, color: '#86909C' },
   value: { fontSize: 16, color: '#1F2329', lineHeight: 22 },
+  registrationsButton: {
+    backgroundColor: '#007AFF',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
+    alignItems: 'center',
+  },
+  registrationsButtonText: {
+    color: 'white',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
   gallerySection: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,

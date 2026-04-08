@@ -290,6 +290,22 @@ export class MemberStore {
     });
     return true;
   }
+
+  // 根据手机号查找会员
+  async findByPhone(phone: string) {
+    try {
+      const member = await prisma.member.findUnique({
+        where: { phone }
+      });
+      return member;
+    } catch (error) {
+      if (this.shouldUseFixtureFallback(error)) {
+        console.warn('[members] Prisma unavailable, falling back to null for findByPhone');
+        return null;
+      }
+      throw error;
+    }
+  }
 }
 
 export const memberStore = new MemberStore();

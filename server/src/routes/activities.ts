@@ -1,7 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { activityStore } from '../models/Activity';
 import { activityPhotoStore } from '../models/ActivityPhoto';
+import { memberStore } from '../models/Member';
+import prisma from '../lib/prisma';
 import { validateActivityCreate, validateActivityUpdate } from '../middleware/validator';
+import { authenticate, requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
@@ -152,9 +155,20 @@ router.delete('/:id', async (req: Request, res: Response) => {
  * POST /api/activities/:id/register
  * 报名活动
  */
-router.post('/:id/register', async (req: Request, res: Response) => {
+router.post('/:id/register', authenticate, async (req: Request, res: Response) => {
   try {
-    const result = await activityStore.register(req.params.id);
+    // 通过手机号查找会员
+    const member = await memberStore.findByPhone(req.user!.phone);
+
+    if (!member) {
+      res.status(400).json({
+        success: false,
+        error: '未找到会员信息，请先注册会员或使用管理员手机号报名'
+      });
+      return;
+    }
+
+    const result = await activityStore.registerById(req.params.id, member.id);
 
     if (!result.success) {
       res.status(400).json({
@@ -164,7 +178,7 @@ router.post('/:id/register', async (req: Request, res: Response) => {
       return;
     }
 
-    res.json({
+    res.status(201).json({
       success: true,
       message: '报名成功'
     });
@@ -173,6 +187,55 @@ router.post('/:id/register', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       error: '报名失败'
+    });
+  }
+});
+
+/**
+ * GET /api/activities/:id/registrations
+ * 获取活动报名者列表（需要管理员权限）
+ */
+router.get('/:id/registrations', authenticate, requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const activity = await activityStore.getById(req.params.id);
+
+    if (!activity) {
+      res.status(404).json({
+        success: false,
+        error: '活动不存在'
+      });
+      return;
+    }
+
+    const registrations = await prisma.registration.findMany({
+      where: { activityId: req.params.id },
+      include: {
+        member: true
+      },
+      orderBy: { createdat: 'asc' }
+    });
+
+    const registrationList = registrations.map((reg) => ({
+      id: reg.id,
+      member: {
+        id: reg.member.id,
+        name: reg.member.name,
+        company: reg.member.company,
+        position: reg.member.position,
+        phone: reg.member.phone
+      },
+      registeredAt: reg.createdat
+    }));
+
+    res.json({
+      success: true,
+      data: registrationList
+    });
+  } catch (error) {
+    console.error('Get registrations error:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取报名者列表失败'
     });
   }
 });

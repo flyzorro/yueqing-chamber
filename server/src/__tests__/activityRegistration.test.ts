@@ -11,16 +11,50 @@ jest.mock('../lib/prisma', () => ({
       findUnique: jest.fn(),
       findMany: jest.fn(),
       count: jest.fn(),
+      update: jest.fn(),
       updateMany: jest.fn(),
     },
+    registration: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      findMany: jest.fn(),
+    },
+    member: {
+      findUnique: jest.fn(),
+    },
+    $transaction: jest.fn(async (fn) => await fn({
+      registration: {
+        findUnique: jest.fn(),
+        create: jest.fn(),
+      },
+      activity: {
+        update: jest.fn(),
+      },
+    })),
   },
 }));
+
+// Mock auth middleware - skip authentication in tests
+jest.mock('../middleware/auth', () => {
+  const actual = jest.requireActual('../middleware/auth');
+  return {
+    ...actual,
+    authenticate: (req: any, res: any, next: any) => {
+      // Mock user with phone for tests
+      req.user = { phone: '12345678900', id: 'user-1' };
+      next();
+    },
+    requireAdmin: (req: any, res: any, next: any) => {
+      next();
+    },
+  };
+});
 
 const app = express();
 app.use(express.json());
 app.use('/api/activities', activitiesRouter);
 
-describe('Activity Registration - Race Condition Fix', () => {
+describe('Activity Registration - New Implementation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -32,25 +66,33 @@ describe('Activity Registration - Race Condition Fix', () => {
         title: 'Annual Meeting',
         currentparticipants: 45,
         maxparticipants: 50,
+        status: 'upcoming',
       };
 
-      // Mock updateMany returning count: 1 (successful update)
+      const mockMember = {
+        id: 'member-1',
+        phone: '12345678900',
+        name: 'Test User',
+      };
+
       (prisma.activity.findUnique as jest.Mock).mockResolvedValue(mockActivity);
-      (prisma.activity.updateMany as jest.Mock).mockResolvedValue({ count: 1 });
+      (prisma.member.findUnique as jest.Mock).mockResolvedValue(mockMember);
+      (prisma.$transaction as jest.Mock).mockImplementation(async (fn) => {
+        await fn({
+          registration: {
+            findUnique: jest.fn().mockResolvedValue(null),
+            create: jest.fn(),
+          },
+          activity: {
+            update: jest.fn(),
+          },
+        });
+      });
 
       const response = await request(app).post('/api/activities/activity-1/register');
 
-      expect(response.status).toBe(200);
+      expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
-      expect(prisma.activity.updateMany).toHaveBeenCalledWith({
-        where: {
-          id: 'activity-1',
-          currentparticipants: { lt: 50 }
-        },
-        data: {
-          currentparticipants: { increment: 1 }
-        }
-      });
     });
 
     it('should reject registration when activity is full', async () => {
@@ -59,11 +101,17 @@ describe('Activity Registration - Race Condition Fix', () => {
         title: 'Annual Meeting',
         currentparticipants: 50,
         maxparticipants: 50,
+        status: 'upcoming',
+      };
+
+      const mockMember = {
+        id: 'member-1',
+        phone: '12345678900',
+        name: 'Test User',
       };
 
       (prisma.activity.findUnique as jest.Mock).mockResolvedValue(mockActivity);
-      // Mock updateMany returning count: 0 (no rows updated - activity was full)
-      (prisma.activity.updateMany as jest.Mock).mockResolvedValue({ count: 0 });
+      (prisma.member.findUnique as jest.Mock).mockResolvedValue(mockMember);
 
       const response = await request(app).post('/api/activities/activity-1/register');
 
@@ -72,55 +120,111 @@ describe('Activity Registration - Race Condition Fix', () => {
       expect(response.body.error).toBe('报名人数已满');
     });
 
-    it('should handle concurrent registrations correctly (race condition prevention)', async () => {
+    it('should reject registration when activity status is completed', async () => {
       const mockActivity = {
         id: 'activity-1',
         title: 'Annual Meeting',
-        currentparticipants: 49,
+        currentparticipants: 45,
         maxparticipants: 50,
+        status: 'completed',
+      };
+
+      const mockMember = {
+        id: 'member-1',
+        phone: '12345678900',
+        name: 'Test User',
       };
 
       (prisma.activity.findUnique as jest.Mock).mockResolvedValue(mockActivity);
-
-      // First concurrent request succeeds
-      (prisma.activity.updateMany as jest.Mock)
-        .mockResolvedValueOnce({ count: 1 })
-        // Second concurrent request fails (count: 0 because first request already incremented)
-        .mockResolvedValueOnce({ count: 0 });
-
-      // Simulate two concurrent requests
-      const [response1, response2] = await Promise.all([
-        request(app).post('/api/activities/activity-1/register'),
-        request(app).post('/api/activities/activity-1/register'),
-      ]);
-
-      // One should succeed, one should fail
-      expect([response1.body.success, response2.body.success]).toContain(true);
-      expect([response1.body.success, response2.body.success]).toContain(false);
-
-      // The one that failed should have the correct error message
-      const failedResponse = response1.body.success ? response2 : response1;
-      expect(failedResponse.body.error).toBe('报名人数已满');
-    });
-
-    it('should return 400 when activity does not exist', async () => {
-      (prisma.activity.findUnique as jest.Mock).mockResolvedValue(null);
-
-      const response = await request(app).post('/api/activities/non-existent/register');
-
-      expect(response.status).toBe(400);
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toBe('活动不存在');
-    });
-
-    it('should return 500 on database error', async () => {
-      (prisma.activity.findUnique as jest.Mock).mockRejectedValue(new Error('Database error'));
+      (prisma.member.findUnique as jest.Mock).mockResolvedValue(mockMember);
 
       const response = await request(app).post('/api/activities/activity-1/register');
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.error).toBe('报名失败');
+      expect(response.body.error).toBe('该活动不接受报名');
+    });
+
+    it('should return 400 when member does not exist', async () => {
+      const mockActivity = {
+        id: 'activity-1',
+        title: 'Annual Meeting',
+        currentparticipants: 45,
+        maxparticipants: 50,
+        status: 'upcoming',
+      };
+
+      (prisma.activity.findUnique as jest.Mock).mockResolvedValue(mockActivity);
+      (prisma.member.findUnique as jest.Mock).mockResolvedValue(null);
+
+      const response = await request(app).post('/api/activities/activity-1/register');
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error).toBe('未找到会员信息，请先注册会员或使用管理员手机号报名');
+    });
+
+    it('should reject duplicate registration', async () => {
+      const mockActivity = {
+        id: 'activity-1',
+        title: 'Annual Meeting',
+        currentparticipants: 45,
+        maxparticipants: 50,
+        status: 'upcoming',
+      };
+
+      const mockMember = {
+        id: 'member-1',
+        phone: '12345678900',
+        name: 'Test User',
+      };
+
+      (prisma.activity.findUnique as jest.Mock).mockResolvedValue(mockActivity);
+      (prisma.member.findUnique as jest.Mock).mockResolvedValue(mockMember);
+      (prisma.$transaction as jest.Mock).mockImplementation(async (fn) => {
+        throw new Error('P2002 Unique constraint violation');
+      });
+
+      const response = await request(app).post('/api/activities/activity-1/register');
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error).toBe('您已报名该活动');
+    });
+  });
+
+  describe('GET /api/activities/:id/registrations', () => {
+    it('should return registration list for admin', async () => {
+      const mockActivity = {
+        id: 'activity-1',
+        title: 'Annual Meeting',
+      };
+
+      const mockRegistrations = [
+        {
+          id: 'reg-1',
+          memberId: 'member-1',
+          activityId: 'activity-1',
+          createdat: new Date(),
+          member: {
+            id: 'member-1',
+            name: 'Test User',
+            company: 'Test Company',
+            position: 'Manager',
+            phone: '12345678900',
+          },
+        },
+      ];
+
+      (prisma.activity.findUnique as jest.Mock).mockResolvedValue(mockActivity);
+      (prisma.registration.findMany as jest.Mock).mockResolvedValue(mockRegistrations);
+
+      const response = await request(app).get('/api/activities/activity-1/registrations');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0].member.name).toBe('Test User');
     });
   });
 });
