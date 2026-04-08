@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Pressable, ScrollView, StyleSheet, Text, View, Image, FlatList, ActivityIndicator } from 'react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { API } from './utils/api';
-import { getAuthHeaders } from './utils/auth';
+import { getAuthHeaders, getUser } from './utils/auth';
 
 interface ActivityPhoto {
   id: string;
@@ -38,12 +38,27 @@ export default function ActivityDetailScreen() {
 
   const [photos, setPhotos] = useState<ActivityPhoto[]>([]);
   const [loadingPhotos, setLoadingPhotos] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // 检查当前用户是否为管理员
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const user = await getUser();
+      setIsAdmin(user?.isAdmin ?? false);
+    };
+    void checkAdmin();
+  }, []);
 
   const title = typeof params.title === 'string' ? params.title : '未命名活动';
   const date = typeof params.date === 'string' ? params.date : '日期待定';
   const location = typeof params.location === 'string' ? params.location : '地点待定';
   const current = typeof params.currentParticipants === 'string' ? params.currentParticipants : '0';
   const max = typeof params.maxParticipants === 'string' ? params.maxParticipants : '0';
+
+  const viewRegistrations = () => {
+    if (!params.id) return;
+    router.push(`/registrations?activityId=${params.id}&activityTitle=${encodeURIComponent(title)}`);
+  };
 
   const fetchPhotos = useCallback(async () => {
     if (!params.id) return;
@@ -91,6 +106,15 @@ export default function ActivityDetailScreen() {
           <Text style={styles.value}>{location}</Text>
           <Text style={styles.label}>报名人数</Text>
           <Text style={styles.value}>{current} / {max}</Text>
+          {isAdmin ? (
+            <Pressable style={styles.registrationsButton} onPress={viewRegistrations}>
+              <Text style={styles.registrationsButtonText}>查看报名者</Text>
+            </Pressable>
+          ) : (
+            <Pressable style={[styles.registrationsButton, { backgroundColor: '#CCCCCC' }]} disabled>
+              <Text style={[styles.registrationsButtonText, { color: '#888888' }]}>仅限管理员查看</Text>
+            </Pressable>
+          )}
         </View>
 
         <View style={styles.gallerySection}>
@@ -141,6 +165,19 @@ const styles = StyleSheet.create({
   meta: { fontSize: 13, color: '#86909C' },
   label: { marginTop: 8, fontSize: 13, color: '#86909C' },
   value: { fontSize: 16, color: '#1F2329', lineHeight: 22 },
+  registrationsButton: {
+    backgroundColor: '#007AFF',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
+    alignItems: 'center',
+  },
+  registrationsButtonText: {
+    color: 'white',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
   gallerySection: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,

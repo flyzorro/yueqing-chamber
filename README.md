@@ -20,7 +20,7 @@
 
 - **首页** - 商会介绍、快捷入口、最新动态
 - **会员中心** - 会员列表、搜索、分页查询
-- **活动管理** - 活动列表、在线报名、分页加载
+- **活动管理** - 活动列表、在线报名、查看报名者（管理员）
 - **商会服务** - 法律、财税、融资等服务
 - **个人中心** - 用户信息、登录状态、设置
 - **登录/注册** - 手机号登录注册
@@ -156,6 +156,7 @@ npx expo run:android
 - `GET /api/activities` - 获取活动列表
 - `GET /api/activities/:id` - 获取活动详情
 - `POST /api/activities/:id/register` - 活动报名
+- `GET /api/activities/:id/registrations` - 获取活动报名者列表（管理员）
 - `POST /api/activities` - 创建活动
 - `PUT /api/activities/:id` - 更新活动
 - `DELETE /api/activities/:id` - 删除活动

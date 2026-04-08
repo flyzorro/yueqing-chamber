@@ -6,6 +6,7 @@ export interface User {
   name: string;
   avatar?: string;
   company?: string;
+  isAdmin?: boolean;
 }
 
 const TOKEN_KEY = 'yueqing_chamber_token';

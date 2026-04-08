@@ -48,7 +48,7 @@ export function authenticate(req: Request, res: Response, next: NextFunction): v
  */
 export function optionalAuthenticate(req: Request, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
-  
+
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     // 没有 Token，继续
     next();
@@ -57,10 +57,22 @@ export function optionalAuthenticate(req: Request, res: Response, next: NextFunc
 
   const token = authHeader.substring(7);
   const payload = verifyToken(token);
-  
+
   if (payload) {
     req.user = payload;
   }
 
+  next();
+}
+
+/**
+ * 管理员权限中间件 - 检查用户是否为管理员
+ */
+export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
+  const adminPhones = (process.env.ADMIN_PHONES?.split(',').map(s => s.trim()).filter(Boolean)) || [];
+  if (!req.user?.phone || !adminPhones.includes(req.user.phone)) {
+    res.status(403).json({ success: false, error: '需要管理员权限' });
+    return;
+  }
   next();
 }
