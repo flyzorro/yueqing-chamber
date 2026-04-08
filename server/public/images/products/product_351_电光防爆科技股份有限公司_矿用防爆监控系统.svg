@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#1e40af"/>
+  <text x="200" y="130" text-anchor="middle" fill="#60a5fa" font-size="64" font-family="Arial, sans-serif">📦</text>
+  <text x="200" y="180" text-anchor="middle" fill="white" font-size="20" font-family="Arial, sans-serif">矿用防爆监控系统</text>
+</svg>
