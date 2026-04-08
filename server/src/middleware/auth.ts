@@ -69,7 +69,7 @@ export function optionalAuthenticate(req: Request, res: Response, next: NextFunc
  * 管理员权限中间件 - 检查用户是否为管理员
  */
 export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
-  const adminPhones = process.env.ADMIN_PHONES?.split(',') || [];
+  const adminPhones = (process.env.ADMIN_PHONES?.split(',').map(s => s.trim()).filter(Boolean)) || [];
   if (!req.user?.phone || !adminPhones.includes(req.user.phone)) {
     res.status(403).json({ success: false, error: '需要管理员权限' });
     return;
