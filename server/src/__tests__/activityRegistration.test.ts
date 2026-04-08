@@ -181,7 +181,7 @@ describe('Activity Registration - New Implementation', () => {
 
       (prisma.activity.findUnique as jest.Mock).mockResolvedValue(mockActivity);
       (prisma.member.findUnique as jest.Mock).mockResolvedValue(mockMember);
-      (prisma.$transaction as jest.Mock).mockImplementation(async (fn) => {
+      (prisma.$transaction as jest.Mock).mockImplementation(async (_fn) => {
         throw new Error('P2002 Unique constraint violation');
       });
 

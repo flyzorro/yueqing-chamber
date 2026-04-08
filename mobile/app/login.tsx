@@ -36,7 +36,7 @@ export default function LoginScreen() {
 
     try {
       const endpoint = isRegister ? 'register' : 'login';
-      const body: any = { phone, password };
+      const body: Record<string, string> = { phone, password };
       if (isRegister) {
         body.name = name;
       }
