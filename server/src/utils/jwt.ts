@@ -13,6 +13,8 @@ export interface JwtPayload {
   userId: string;
   phone: string;
   name: string;
+  company?: string;
+  position?: string;
 }
 
 /**
