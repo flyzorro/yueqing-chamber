@@ -158,14 +158,35 @@ router.delete('/:id', async (req: Request, res: Response) => {
 router.post('/:id/register', authenticate, async (req: Request, res: Response) => {
   try {
     // 通过手机号查找会员
-    const member = await memberStore.findByPhone(req.user!.phone);
+    let member = await memberStore.findByPhone(req.user!.phone);
 
+    // 如果没有会员记录，检查是否为管理员
     if (!member) {
-      res.status(400).json({
-        success: false,
-        error: '未找到会员信息，请先注册会员或使用管理员手机号报名'
-      });
-      return;
+      const isAdmin = (process.env.ADMIN_PHONES?.split(',').map(s => s.trim()).filter(Boolean) || []).includes(req.user!.phone);
+
+      if (isAdmin) {
+        // 为管理员自动创建会员记录
+        member = await memberStore.create({
+          phone: req.user!.phone,
+          name: req.user!.name,
+          company: req.user!.company || '管理员',
+          position: req.user!.position || '管理员'
+        });
+
+        if (!member) {
+          res.status(400).json({
+            success: false,
+            error: '创建会员信息失败'
+          });
+          return;
+        }
+      } else {
+        res.status(400).json({
+          success: false,
+          error: '未找到会员信息，请先注册会员'
+        });
+        return;
+      }
     }
 
     const result = await activityStore.registerById(req.params.id, member.id);
