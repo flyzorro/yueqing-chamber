@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 import routes from './routes';
 import swaggerDocument from './swagger.json';
+import path from 'path';
 
 dotenv.config();
 
@@ -16,6 +17,9 @@ export function createApp() {
 
   app.use(cors());
   app.use(express.json());
+
+  // Serve static files from public directory
+  app.use('/images', express.static(path.join(__dirname, '../public/images')));
 
   // DEBUG: 记录所有请求
   app.use((req, _res, next) => {
