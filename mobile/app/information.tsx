@@ -230,7 +230,14 @@ export default function InformationScreen() {
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <View style={styles.headerLeft}>
-            <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <Pressable
+              onPress={() => router.back()}
+              style={styles.backButton}
+              accessibilityRole="button"
+              accessibilityLabel="返回上一页"
+              accessibilityHint="返回到上一个页面"
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
               <Text style={styles.backButtonText}>‹ 返回</Text>
             </Pressable>
             <Text style={styles.title}>信息发布</Text>
