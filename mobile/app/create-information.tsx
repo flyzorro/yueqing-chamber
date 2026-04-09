@@ -66,6 +66,9 @@ export default function CreateInformationScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Text style={styles.backButtonText}>✕</Text>
+          </TouchableOpacity>
           <Text style={styles.title}>发布信息</Text>
         </View>
 
@@ -163,7 +166,22 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F5F5' },
   scrollView: { flex: 1 },
   scrollContent: { flexGrow: 1 },
-  header: { padding: 20, backgroundColor: '#007AFF', marginBottom: 20 },
+  header: {
+    padding: 20,
+    backgroundColor: '#007AFF',
+    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    marginRight: 16,
+    padding: 4,
+  },
+  backButtonText: {
+    fontSize: 20,
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
   title: { fontSize: 24, fontWeight: 'bold', color: '#FFFFFF' },
   form: { padding: 20 },
   inputGroup: { marginBottom: 20 },
