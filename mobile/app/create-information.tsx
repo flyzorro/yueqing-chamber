@@ -52,7 +52,7 @@ export default function CreateInformationScreen() {
       });
 
       Alert.alert('成功', '信息发布成功', [
-        { text: '确定', onPress: () => router.back() },
+        { text: '确定', onPress: () => router.replace('/information') },
       ]);
     } catch (error) {
       console.error('Create information error:', error);
