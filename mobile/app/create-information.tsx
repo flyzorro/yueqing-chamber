@@ -52,7 +52,7 @@ export default function CreateInformationScreen() {
       });
 
       Alert.alert('成功', '信息发布成功', [
-        { text: '确定', onPress: () => router.back() },
+        { text: '确定', onPress: () => router.replace('/information') },
       ]);
     } catch (error) {
       console.error('Create information error:', error);
@@ -66,6 +66,16 @@ export default function CreateInformationScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.backButton}
+            accessibilityRole="button"
+            accessibilityLabel="关闭"
+            accessibilityHint="返回到上一个页面"
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Text style={styles.backButtonText}>✕</Text>
+          </TouchableOpacity>
           <Text style={styles.title}>发布信息</Text>
         </View>
 
@@ -163,7 +173,22 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F5F5' },
   scrollView: { flex: 1 },
   scrollContent: { flexGrow: 1 },
-  header: { padding: 20, backgroundColor: '#007AFF', marginBottom: 20 },
+  header: {
+    padding: 20,
+    backgroundColor: '#007AFF',
+    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    marginRight: 16,
+    padding: 4,
+  },
+  backButtonText: {
+    fontSize: 20,
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
   title: { fontSize: 24, fontWeight: 'bold', color: '#FFFFFF' },
   form: { padding: 20 },
   inputGroup: { marginBottom: 20 },

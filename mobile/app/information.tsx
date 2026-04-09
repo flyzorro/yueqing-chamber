@@ -229,7 +229,19 @@ export default function InformationScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerRow}>
-          <Text style={styles.title}>信息发布</Text>
+          <View style={styles.headerLeft}>
+            <Pressable
+              onPress={() => router.back()}
+              style={styles.backButton}
+              accessibilityRole="button"
+              accessibilityLabel="返回上一页"
+              accessibilityHint="返回到上一个页面"
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Text style={styles.backButtonText}>‹ 返回</Text>
+            </Pressable>
+            <Text style={styles.title}>信息发布</Text>
+          </View>
           {isLoggedIn && (
             <Pressable
               style={styles.createButton}
@@ -286,6 +298,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  backButton: {
+    padding: 4,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: '#1677FF',
+    fontWeight: '500',
   },
   title: {
     fontSize: 24,
