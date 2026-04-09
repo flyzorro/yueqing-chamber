@@ -62,6 +62,14 @@ export default function InformationScreen() {
   const [error, setError] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [canGoBack, setCanGoBack] = useState(false);
+
+  // Check if there's a previous screen to go back to
+  useEffect(() => {
+    // In expo-router, we can check if we're at the root of the stack
+    // For now, we'll hide the back button on the main tab screen
+    setCanGoBack(false); // Information is a tab screen, no back needed
+  }, []);
 
   const fetchInformations = useCallback(async (options?: { refresh?: boolean; category?: string }) => {
     const refresh = options?.refresh ?? false;
@@ -230,8 +238,8 @@ export default function InformationScreen() {
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <View style={styles.headerLeft}>
-            <Pressable onPress={() => router.back()} style={styles.backButton}>
-              <Text style={styles.backButtonText}>‹ 返回</Text>
+            <Pressable onPress={() => router.push('/(tabs)')} style={styles.backButton}>
+              <Text style={styles.backButtonText}>首页</Text>
             </Pressable>
             <Text style={styles.title}>信息发布</Text>
           </View>
