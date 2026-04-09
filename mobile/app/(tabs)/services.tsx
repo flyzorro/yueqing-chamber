@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 const services = [
   { id: '1', title: '法律服务', description: '专业律师团队提供法律咨询与合规支持', icon: 'document-text' },
@@ -15,6 +16,7 @@ const services = [
 ];
 
 export default function ServicesScreen() {
+  const router = useRouter();
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -24,7 +26,15 @@ export default function ServicesScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.grid}>
           {services.map((service) => (
-            <TouchableOpacity key={service.id} style={styles.serviceCard}>
+            <TouchableOpacity
+              key={service.id}
+              style={styles.serviceCard}
+              onPress={() => {
+                if (service.title === '信息发布') {
+                  router.push('/information');
+                }
+              }}
+            >
               <Ionicons name={service.icon as any} size={32} color="#007AFF" />
               <Text style={styles.serviceTitle}>{service.title}</Text>
               <Text style={styles.serviceDescription}>{service.description}</Text>

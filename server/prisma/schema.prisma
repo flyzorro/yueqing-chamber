@@ -30,7 +30,6 @@ model Member {
   chamberTitle  String?        @db.VarChar
   createdat     DateTime?      @default(now()) @db.Timestamp(6)
   updatedat     DateTime?      @default(now()) @db.Timestamp(6)
-
   registrations Registration[]
 
   @@index([phone])
@@ -38,18 +37,18 @@ model Member {
 }
 
 model Company {
-  id          String    @id @default(cuid()) @db.VarChar
-  name        String    @unique @db.VarChar
-  industry    String?   @db.VarChar
-  contactName String?   @db.VarChar
-  phone       String?   @db.VarChar
-  address     String?   @db.VarChar
-  logo        String?   @db.VarChar
-  status      String?   @default("active") @db.VarChar
-  summary     String?   @db.VarChar
-  createdat   DateTime? @default(now()) @db.Timestamp(6)
-  updatedat   DateTime? @default(now()) @db.Timestamp(6)
-
+  id          String           @id @default(cuid()) @db.VarChar
+  name        String           @unique @db.VarChar
+  industry    String?          @db.VarChar
+  contactName String?          @db.VarChar
+  phone       String?          @db.VarChar
+  address     String?          @db.VarChar
+  logo        String?          @db.VarChar
+  status      String?          @default("active") @db.VarChar
+  summary     String?          @db.VarChar
+  createdat   DateTime?        @default(now()) @db.Timestamp(6)
+  updatedat   DateTime?        @default(now()) @db.Timestamp(6)
+  contactname String?          @db.VarChar
   products    CompanyProduct[]
 
   @@index([status])
@@ -67,7 +66,6 @@ model CompanyProduct {
   sortOrder   Int       @default(0)
   createdat   DateTime? @default(now()) @db.Timestamp(6)
   updatedat   DateTime? @default(now()) @db.Timestamp(6)
-
   company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@unique([companyId, seedKey])
@@ -75,15 +73,15 @@ model CompanyProduct {
 }
 
 model CivilServant {
-  id          String    @id @default(cuid()) @db.VarChar
-  name        String    @db.VarChar
-  department  String?   @db.VarChar
-  position    String?   @db.VarChar
-  phone       String?   @db.VarChar
-  email       String?   @db.VarChar
-  status      String?   @default("active") @db.VarChar
-  createdat   DateTime? @default(now()) @db.Timestamp(6)
-  updatedat   DateTime? @default(now()) @db.Timestamp(6)
+  id         String    @id @default(cuid()) @db.VarChar
+  name       String    @db.VarChar
+  department String?   @db.VarChar
+  position   String?   @db.VarChar
+  phone      String?   @db.VarChar
+  email      String?   @db.VarChar
+  status     String?   @default("active") @db.VarChar
+  createdat  DateTime? @default(now()) @db.Timestamp(6)
+  updatedat  DateTime? @default(now()) @db.Timestamp(6)
 
   @@index([status])
   @@index([name])
@@ -91,47 +89,44 @@ model CivilServant {
 }
 
 model Activity {
-  id                  String        @id @default(cuid()) @db.VarChar
-  title               String        @db.VarChar
+  id                  String          @id @default(cuid()) @db.VarChar
+  title               String          @db.VarChar
   description         String?
-  date                DateTime      @db.Timestamp(6)
-  location            String        @db.VarChar
+  date                DateTime        @db.Timestamp(6)
+  location            String          @db.VarChar
   maxparticipants     Int
-  currentparticipants Int?          @default(0)
-  status              String?       @default("upcoming") @db.VarChar
-  createdat           DateTime?     @default(now()) @db.Timestamp(6)
-  updatedat           DateTime?     @default(now()) @db.Timestamp(6)
-
-  registrations       Registration[]
+  currentparticipants Int?            @default(0)
+  status              String?         @default("upcoming") @db.VarChar
+  createdat           DateTime?       @default(now()) @db.Timestamp(6)
+  updatedat           DateTime?       @default(now()) @db.Timestamp(6)
   photos              ActivityPhoto[]
+  registrations       Registration[]
 
   @@index([date])
   @@index([status])
 }
 
 model ActivityPhoto {
-  id          String    @id @default(cuid()) @db.VarChar
-  activityId  String    @db.VarChar
-  imageUrl    String    @db.VarChar
-  caption     String?   @db.VarChar
-  sortorder   Int?      @default(0)
-  createdat   DateTime? @default(now()) @db.Timestamp(6)
-
-  activity    Activity  @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  id         String    @id @default(cuid()) @db.VarChar
+  activityId String    @db.VarChar
+  imageUrl   String    @db.VarChar
+  caption    String?   @db.VarChar
+  sortorder  Int?      @default(0)
+  createdat  DateTime? @default(now()) @db.Timestamp(6)
+  activity   Activity  @relation(fields: [activityId], references: [id], onDelete: Cascade)
 
   @@index([activityId])
 }
 
 model Registration {
-  id          String    @id @default(cuid()) @db.VarChar
-  memberId    String    @db.VarChar
-  activityId  String    @db.VarChar
-  status      String?   @default("registered") @db.VarChar
-  createdat   DateTime? @default(now()) @db.Timestamp(6)
-  updatedat   DateTime? @default(now()) @db.Timestamp(6)
-
-  member      Member    @relation(fields: [memberId], references: [id])
-  activity    Activity  @relation(fields: [activityId], references: [id])
+  id         String    @id @default(cuid()) @db.VarChar
+  memberId   String    @db.VarChar
+  activityId String    @db.VarChar
+  status     String?   @default("registered") @db.VarChar
+  createdat  DateTime? @default(now()) @db.Timestamp(6)
+  updatedat  DateTime? @default(now()) @db.Timestamp(6)
+  activity   Activity  @relation(fields: [activityId], references: [id])
+  member     Member    @relation(fields: [memberId], references: [id])
 
   @@unique([memberId, activityId])
   @@index([memberId])

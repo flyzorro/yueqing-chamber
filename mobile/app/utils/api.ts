@@ -25,6 +25,10 @@ export const API = {
   // 活动
   ACTIVITIES: `${API_BASE_URL}/api/activities`,
 
+  // 信息发布
+  INFORMATION: `${API_BASE_URL}/api/information`,
+  INFORMATION_CATEGORIES: `${API_BASE_URL}/api/information/categories`,
+
   // 健康检查
   HEALTH: `${API_BASE_URL}/health`,
 };
