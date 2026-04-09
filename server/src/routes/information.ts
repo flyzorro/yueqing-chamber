@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { informationStore, type UpdateInfoRequest } from '../models/Information';
+import { informationStore } from '../models/Information';
 import { authenticate } from '../middleware/auth';
 import { VALID_CATEGORIES, type InfoCategory } from '../constants/info-categories';
 
@@ -150,7 +150,7 @@ router.put('/:id', authenticate, async (req: Request, res: Response) => {
     }
 
     const { title, content, category, contactname, contactphone } = req.body;
-    const updateData: Partial<UpdateInfoRequest> = {};
+    const updateData: Record<string, unknown> = {};
 
     if (title !== undefined) {
       if (typeof title !== 'string' || title.trim().length < 1) {
@@ -177,17 +177,11 @@ router.put('/:id', authenticate, async (req: Request, res: Response) => {
     }
 
     if (contactname !== undefined) {
-      const trimmed = typeof contactname === 'string' ? contactname.trim() : '';
-      if (trimmed.length > 0) {
-        updateData.contactname = trimmed;
-      }
+      updateData.contactname = typeof contactname === 'string' ? contactname.trim() : null;
     }
 
     if (contactphone !== undefined) {
-      const trimmed = typeof contactphone === 'string' ? contactphone.trim() : '';
-      if (trimmed.length > 0) {
-        updateData.contactphone = trimmed;
-      }
+      updateData.contactphone = typeof contactphone === 'string' ? contactphone.trim() : null;
     }
 
     const updated = await informationStore.update(req.params.id, updateData);
