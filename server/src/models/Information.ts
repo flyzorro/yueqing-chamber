@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import prisma from '../lib/prisma';
-import { INFO_CATEGORIES, type InfoCategory } from '../constants/info-categories';
+import type { InfoCategory } from '../constants/info-categories';
 
 export interface CreateInfoRequest {
   title: string;
