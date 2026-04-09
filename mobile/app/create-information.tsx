@@ -66,7 +66,14 @@ export default function CreateInformationScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.backButton}
+            accessibilityRole="button"
+            accessibilityLabel="关闭"
+            accessibilityHint="返回到上一个页面"
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
             <Text style={styles.backButtonText}>✕</Text>
           </TouchableOpacity>
           <Text style={styles.title}>发布信息</Text>
